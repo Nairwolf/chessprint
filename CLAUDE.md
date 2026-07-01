@@ -142,6 +142,7 @@ FEN ; title (optional)
 
 - Answer space fills the remaining vertical space below the diagram in each cell (free space, no lines, no checkboxes)
 - No cover page — exercises start on page 1
+- Page content (header + grid) must stay **strictly** below the usable page height. If it exactly equals the available height, `@react-pdf` rounds up and spills into a blank continuation page. So: the header takes exactly `headerHeight` (use `borderBottom`, never `marginBottom`), and `computeLayout` subtracts a small `safetyPad` from the grid height.
 
 ### State management
 - All state lives in `App.tsx` via `useState`

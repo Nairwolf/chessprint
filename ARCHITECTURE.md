@@ -171,6 +171,11 @@ Grid: always 2 columns. Number of rows varies from 1 to 3 based on the chosen se
 
 The answer space fills the remaining vertical space below the diagram in each cell.
 
+**Single-page containment:** `layout.ts` is the single source of truth for every dimension, and the total content of one page (header + grid) must stay *strictly* below the usable page height. If it exactly equals the available height, `@react-pdf`'s rounding overflows into a blank continuation page. Two rules follow from this:
+
+- The header occupies exactly `headerHeight` — it must not add any extra margin/padding on top of it (use `borderBottom` for the separator, never `marginBottom`).
+- `computeLayout` reserves a small `safetyPad` (a couple of points) subtracted from the grid height, guaranteeing the content never reaches the page edge.
+
 ## 8. Validation error handling
 
 Validation is triggered on input (with a ~300ms debounce to avoid blocking typing) and on clicking "Export".
