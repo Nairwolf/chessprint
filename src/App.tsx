@@ -1,10 +1,12 @@
+import { pdf } from '@react-pdf/renderer'
 import { useEffect, useState } from 'react'
-import { parseInput } from './lib/parser'
-import { validateExercises } from './lib/validator'
 import ExerciseForm from './components/ui/ExerciseForm'
 import ExportControls from './components/ui/ExportControls'
 import ErrorMessage from './components/ui/ErrorMessage'
 import Preview from './components/ui/Preview'
+import PdfDocument from './components/pdf/PdfDocument'
+import { parseInput } from './lib/parser'
+import { validateExercises } from './lib/validator'
 import type { Exercise, ParseError, ExportConfig } from './types'
 
 export default function App() {
@@ -23,12 +25,21 @@ export default function App() {
     return () => clearTimeout(timer)
   }, [fenText])
 
-  function handleExport() {
+  async function handleExport() {
     const { exercises: exs, errors: errs } = validateExercises(parseInput(fenText))
     setExercises(exs)
     setErrors(errs)
     if (errs.length > 0) return
-    // PDF generation — step 9
+
+    const blob = await pdf(
+      <PdfDocument exercises={exs} config={{ documentTitle, exercisesPerPage }} />
+    ).toBlob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${documentTitle || 'chessprint'}.pdf`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   return (
