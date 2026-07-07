@@ -1,6 +1,7 @@
 import { Circle, G, Path, Rect, Svg } from '@react-pdf/renderer'
 import { extractActiveColor, fenToBoard } from '../../lib/fen'
-import { PIECE_PATHS } from '../../lib/pieces'
+import { PIECES } from '../../lib/pieces'
+import type { PieceKey } from '../../types'
 
 type Props = {
   fen: string
@@ -24,20 +25,26 @@ export default function ChessBoardPdf({ fen, size }: Props) {
           const light = (ri + fi) % 2 === 1
           const x = fi * sq
           const y = ri * sq
-          const isWhitePiece = piece !== null && piece === piece.toUpperCase()
-          const pathD = piece ? PIECE_PATHS[piece.toLowerCase()] : undefined
+          const layers = piece ? PIECES[piece as PieceKey] : undefined
 
           return (
             <G key={`${ri}-${fi}`}>
               <Rect x={x} y={y} width={sq} height={sq} fill={light ? LIGHT_SQ : DARK_SQ} />
-              {pathD && (
+              {layers && (
                 <G transform={`translate(${x},${y}) scale(${sq / 45})`}>
-                  <Path
-                    d={pathD}
-                    fill={isWhitePiece ? '#ffffff' : '#1a1a1a'}
-                    stroke={isWhitePiece ? '#333333' : '#cccccc'}
-                    strokeWidth={1.5}
-                  />
+                  {layers.map((layer, li) => (
+                    <Path
+                      key={li}
+                      d={layer.d}
+                      fill={layer.fill}
+                      fillRule={layer.fillRule}
+                      stroke={layer.stroke}
+                      strokeWidth={layer.strokeWidth}
+                      strokeLinecap={layer.strokeLinecap}
+                      strokeLinejoin={layer.strokeLinejoin}
+                      opacity={layer.opacity}
+                    />
+                  ))}
                 </G>
               )}
             </G>

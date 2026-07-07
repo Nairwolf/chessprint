@@ -130,7 +130,7 @@ The diagram is an SVG generated in React from the FEN. Two distinct components a
 - `ChessBoard.tsx` — for the web interface (standard React SVG, used in the preview)
 - `ChessBoardPdf.tsx` — for the PDF (SVG rewritten with `@react-pdf` primitives: `<Svg>`, `<Rect>`, `<G>`, `<Path>`)
 
-**Piece rendering:** pieces are drawn as SVG vector paths (open-licence piece set, e.g. Merida or the `chess-pieces` project). This guarantees clean rendering at any size, with no dependency on Unicode fonts whose rendering is inconsistent across operating systems.
+**Piece rendering:** pieces are drawn as SVG vector paths. The piece set is Lichess's **caliente** (by avi, CC BY-NC-SA 4.0 — see `NOTICE`; non-commercial use only), vendored as generated data in `src/lib/pieces.ts`: `PIECES: Record<PieceKey, PieceLayer[]>` on a 45×45 viewBox. Each piece is an ordered array of layers (path + fill/stroke/opacity); white and black pieces are distinct artwork keyed by the raw FEN letter. The data is pre-flattened for `@react-pdf` compatibility: transforms baked into the geometry, single-stop gradients resolved to solid fills, circles/ellipses converted to cubic béziers, no arc commands. This guarantees identical rendering in the web SVG and the PDF at any size, with no dependency on Unicode fonts whose rendering is inconsistent across operating systems.
 
 **Active color indicator:** a filled circle (filled black = Black to play, white with border = White to play) displayed outside the board, bottom right. Extracted automatically from the FEN's `activeColor` field.
 

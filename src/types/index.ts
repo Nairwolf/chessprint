@@ -22,6 +22,19 @@ export type ParsedLine = {
   lineNumber: number
 }
 
+export type PieceKey = 'K' | 'Q' | 'R' | 'B' | 'N' | 'P' | 'k' | 'q' | 'r' | 'b' | 'n' | 'p'
+
+export type PieceLayer = {
+  d: string
+  fill: string
+  fillRule?: 'nonzero' | 'evenodd'
+  stroke?: string
+  strokeWidth?: number
+  strokeLinecap?: 'round' | 'butt' | 'square'
+  strokeLinejoin?: 'round' | 'miter' | 'bevel'
+  opacity?: number
+}
+
 export type LayoutMetrics = {
   pageWidth: number
   pageHeight: number

@@ -117,7 +117,7 @@ FEN ; title (optional)
 
 ### Diagram rendering
 - Pieces are rendered as **SVG vector paths**, never as Unicode characters
-- Use an open-licence piece set (e.g. Merida or `chess-pieces` on npm)
+- Piece set: Lichess **caliente** (CC BY-NC-SA 4.0, attribution in `NOTICE` — non-commercial use only), vendored as generated layered-path data in `src/lib/pieces.ts` (`PIECES: Record<PieceKey, PieceLayer[]>`, 45×45 viewBox). Do not edit that file by hand; the data is pre-flattened (no arcs, no gradients, no transforms) so it renders identically in web SVG and `@react-pdf`
 - **No board coordinates** in v1 (no a-h letters, no 1-8 numbers)
 - Active color indicator: a filled circle outside the board, bottom-right corner
   - Black filled circle = Black to play
