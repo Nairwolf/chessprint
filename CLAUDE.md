@@ -127,7 +127,7 @@ FEN ; title (optional)
 
 ### PDF layout
 - Page size: A4 (595 × 842 pt)
-- Header: document title, repeated on every page, ~40 pt height
+- Header: document title, **horizontally centered**, repeated on every page, ~40 pt height
 - Grid: always 2 columns, number of rows depends on exercisesPerPage
 - Sizes are computed in `layout.ts` — no hardcoded sizes in PDF components
 
@@ -143,6 +143,7 @@ FEN ; title (optional)
 - Answer space fills the remaining vertical space below the diagram in each cell (free space, no lines, no checkboxes)
 - No cover page — exercises start on page 1
 - Page content (header + grid) must stay **strictly** below the usable page height. If it exactly equals the available height, `@react-pdf` rounds up and spills into a blank continuation page. So: the header takes exactly `headerHeight` (use `borderBottom`, never `marginBottom`), and `computeLayout` subtracts a small `safetyPad` from the grid height.
+- Header title centering: the header `View` is a **column** container (default `flexDirection`) with `justifyContent: 'center'` (vertical centering); the title `Text` stretches full-width via the default `alignItems: 'stretch'`, so `textAlign: 'center'` works. Do **not** use a `flexDirection: 'row'` header with `flex: 1` / `width: '100%'` on the `Text` — `@react-pdf` does not reliably stretch a `Text` node to fill a row parent, so `textAlign` has no effect.
 
 ### State management
 - All state lives in `App.tsx` via `useState`

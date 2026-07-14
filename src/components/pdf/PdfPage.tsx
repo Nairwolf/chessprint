@@ -10,8 +10,7 @@ type Props = {
 
 const styles = StyleSheet.create({
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#cccccc',
   },
@@ -19,6 +18,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     color: '#333333',
+    textAlign: 'center',
   },
   grid: {
     flexDirection: 'row',

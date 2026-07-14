@@ -144,7 +144,7 @@ A4 page (595 × 842 pt in PDF coordinates):
 
 ```
 ┌─────────────────────────────────┐
-│  Header: document title         │  ~40 pt
+│     Document title (centered)   │  ~40 pt
 ├─────────────────────────────────┤
 │  Exercise grid                  │  remaining space
 │  ┌───────────┐  ┌───────────┐   │
@@ -175,6 +175,14 @@ The answer space fills the remaining vertical space below the diagram in each ce
 
 - The header occupies exactly `headerHeight` — it must not add any extra margin/padding on top of it (use `borderBottom` for the separator, never `marginBottom`).
 - `computeLayout` reserves a small `safetyPad` (a couple of points) subtracted from the grid height, guaranteeing the content never reaches the page edge.
+
+The document title is **horizontally centered** in the header. The header `View` is a
+**column** container (`@react-pdf`'s default `flexDirection`) with `justifyContent: 'center'`
+for vertical centering; the title `Text` then stretches to the full header width via the
+default `alignItems: 'stretch'`, so `textAlign: 'center'` on it takes effect. Do **not** use a
+`flexDirection: 'row'` header with `flex: 1` / `width: '100%'` on the `Text` — `@react-pdf`
+does not reliably stretch a `Text` node to fill a row parent, so the text box shrinks to its
+content and `textAlign` has no effect.
 
 ## 8. Validation error handling
 
