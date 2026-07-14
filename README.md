@@ -88,6 +88,9 @@ for the full specification and technical decisions.
 
 ## License and attribution
 
+ChessPrint is licensed under **[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)**
+— see the [`LICENSE`](LICENSE) file.
+
 The chess piece graphics are the **caliente** piece set by
 [avi](https://github.com/avi-0/caliente), licensed under
 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) and obtained

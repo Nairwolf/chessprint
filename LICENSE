@@ -1,0 +1,48 @@
+ChessPrint
+
+Copyright (c) 2026 Nairwolf
+
+This work — including the ChessPrint source code and the bundled chess piece
+graphics — is licensed under the
+
+    Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+    License (CC BY-NC-SA 4.0).
+
+To view a copy of this license, visit:
+
+    https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+or read the full legal code at:
+
+    https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+
+
+Why this license
+----------------
+
+ChessPrint embeds the "caliente" chess piece set (by avi,
+https://github.com/avi-0/caliente, obtained via lichess-org/lila), which is
+itself licensed under CC BY-NC-SA 4.0. The ShareAlike clause requires that any
+distribution combining or adapting that material be released under the same
+license, so the project as a whole adopts CC BY-NC-SA 4.0. See the NOTICE file
+for third-party attribution details.
+
+
+Summary (not a substitute for the full license text)
+-----------------------------------------------------
+
+You are free to:
+
+  * Share  — copy and redistribute the material in any medium or format.
+  * Adapt  — remix, transform, and build upon the material.
+
+Under the following terms:
+
+  * Attribution  — You must give appropriate credit, provide a link to the
+    license, and indicate if changes were made.
+  * NonCommercial — You may not use the material for commercial purposes.
+  * ShareAlike   — If you remix, transform, or build upon the material, you
+    must distribute your contributions under the same license as the original.
+
+No additional restrictions — You may not apply legal terms or technological
+measures that legally restrict others from doing anything the license permits.
