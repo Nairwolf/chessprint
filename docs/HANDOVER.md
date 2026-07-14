@@ -79,9 +79,87 @@ Data in `src/lib/pieces.ts`: `export const PIECES: Record<PieceKey, PieceLayer[]
 
 ---
 
+## PDF UI polish — diagram layout ✅ DONE (2026-07-14)
+
+Two rounds of PDF layout work on top of the MVP, both committed to `main`.
+
+```
+776f646 feat: enlarge and center chess diagrams, compact writing space
+e24d949 feat: center the document title in the PDF header
+```
+
+**1. Centered the document title (commit e24d949).** The header title was left-aligned.
+Two failed attempts first: `textAlign: 'center'` with `width: '100%'`, then with `flex: 1`,
+both on the title `Text`. Neither worked because in `@react-pdf` a `Text` node does **not**
+stretch to fill a `flexDirection: 'row'` parent, so the text box shrank to its content and
+`textAlign` had nothing to center within. **Fix:** made the header a **column** container
+(`@react-pdf`'s default) with `justifyContent: 'center'` for vertical centering; the title
+`Text` then stretches full-width via the default `alignItems: 'stretch'`, so `textAlign:
+'center'` takes effect. In `src/components/pdf/PdfPage.tsx`.
+
+**2. Bigger, centered diagrams with a compact writing strip (commit 776f646).** Three
+complaints: boards too small, boards not centered (the right-column board hugged the center
+gutter because cells used `alignItems: 'flex-start'`), and the writing space too large (a
+`flex: 1` filler soaked up all leftover height — ~206pt under a 170pt board at 4/page).
+**Fixes:**
+- `src/lib/layout.ts` — `boardSize` is now `min(widthBudget, heightBudget)` instead of
+  `min(cellWidth, cellHeight) * 0.62`. `widthBudget` fills the column (accounting for the
+  active-color circle overhang, `circleFactor 1.07` + `circlePad 8`); `heightBudget` leaves
+  room for the optional title (`titleAllow 14`) and a compact writing strip
+  (`answerFrac 0.18` of cell height), with a `boardSafety 3` margin. Resulting board sizes
+  (was → now): 1/pg 339→~496, 2/pg 170→~241, 3&4/pg 170→~241, 5&6/pg 155→~184.
+- `src/components/pdf/PdfExercise.tsx` — each cell now centers its content both ways
+  (`alignItems: 'center'` + `justifyContent: 'center'`); the writing space is a fixed-height
+  `View` (`answerHeight`) instead of `flex: 1`. The now-unused `centered` prop was dropped
+  (also from the `PdfPage.tsx` call site).
+
+**Verified:** numerically checked all six per-page settings fit within the cell with a safety
+margin; rendered real PDFs via `renderToFile` (5 FENs → correct page counts, no blank
+continuation pages) and rasterized the 4/page sheet with `pdftoppm` to confirm larger,
+symmetric, centered boards with a compact writing strip. `npm run typecheck` + `npm run lint`
+pass. Docs (SPEC §3.4/3.5, ARCHITECTURE §7, CLAUDE.md) updated to match.
+
+**Known minor limitation:** because the active-color circle sits to the right of the board,
+the 8×8 grid lands ~12pt left of exact cell-center. Barely perceptible; not compensated for.
+
+---
+
 ## Open idea — B&W print contrast (not started)
 
 Grayscale printing was checked on 2026-07-07 (simulations in `~/chessprint-verification/`: `gray-page1.png`, `bw-crop.png`). Pieces read perfectly in grayscale and even 1-bit dither; the weak point is the board itself — the tan/brown squares (`LIGHT_SQ`/`DARK_SQ` in both ChessBoard components) lose contrast under coarse 1-bit dithering. Possible improvement: raise the luminance gap between the two square colors, or add a "print-friendly" palette option. Two-constant change; user has not decided yet.
+
+---
+
+## Open idea — adapt the last page to its diagram count (not started)
+
+Raised by the user on 2026-07-14. Today `computeLayout(exercisesPerPage)` is computed **once**
+for the whole document, so a partly-filled final page reuses the full-page layout. Example: 6
+positions at 4/page → page 2 shows only 2 diagrams, but sized as if 4 would fit, wasting space.
+
+**Desired rule:** on the final (partial) page, use the layout that matches the number of
+diagrams that actually remain — e.g. 2 leftover diagrams should use the 2-per-page layout.
+
+**Implementation sketch:** `PdfDocument.tsx` already slices exercises into per-page groups
+(`App.tsx`/`PdfDocument.tsx`). `computeLayout` would be called per page with an effective count
+= `min(exercisesPerPage, remainingOnThisPage)`, and that page's layout passed to `PdfPage`.
+Watch: the odd-count centering logic (`isCentered` / `centered`) and the single-page
+containment rule (`safetyPad`) must still hold for the recomputed layout. Interacts with the
+"per-layout tuning" idea below — the last page would inherit whatever layout each count uses.
+
+## Open idea — per-count layout tuning (not started)
+
+Raised by the user on 2026-07-14. Some diagrams-per-page layouts could be better:
+
+- **2 per page:** prefer **one diagram on top, one on the bottom** (stacked, 1 column × 2 rows)
+  rather than the current 2 columns × 1 row — bigger boards, better use of the tall A4 page.
+  Would make `columns`/`rows` in `computeLayout` a per-count choice rather than the current
+  "1 column only when count is 1, else 2 columns" rule.
+- **1 per page:** the single board is now ~496pt — probably **too big**. Shrink it a bit so
+  there's deliberate empty space, which pairs with the existing v2 direction of adding
+  child-friendly illustrations/decorations to fill the space when the sheet is for kids.
+
+Both are tuning of `computeLayout` (`src/lib/layout.ts`) and would want a fresh render + visual
+check per count. Best done together with the last-page-adaptation idea above.
 
 ---
 
