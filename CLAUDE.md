@@ -4,7 +4,7 @@
 
 ChessPrint is a 100% frontend static web app that generates printable chess exercise PDFs for children. Users paste a list of FEN positions, configure the layout, and download a PDF with large diagrams and free answer spaces for children to write on.
 
-Read SPEC.md and ARCHITECTURE.md in full before doing anything. They are the source of truth for all features and technical decisions.
+Read docs/SPEC.md and docs/ARCHITECTURE.md in full before doing anything. They are the source of truth for all features and technical decisions.
 
 ---
 
