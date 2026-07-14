@@ -54,7 +54,7 @@ For each valid exercise, a chess diagram is generated from the FEN:
 
 ### 3.4 Answer space
 
-- Each exercise has a **free space** below the diagram, for the child to draw or annotate their answer by hand (no notation lines, no checkboxes).
+- Each exercise has a **compact free space** below the diagram, for the child to write or annotate their answer by hand (no notation lines, no checkboxes). The space is intentionally modest — the diagram is the focus and fills the column width.
 - The size of this space varies according to the chosen diagram density per page (see 3.5).
 
 ### 3.5 Layout and PDF export
@@ -62,7 +62,7 @@ For each valid exercise, a chess diagram is generated from the FEN:
 - **No cover page**: the document starts directly with the exercises.
 - **Global title as a repeated header** on every page of the PDF (when the document spans multiple pages).
 - **Diagrams per page**: a parameter chosen by the user at export time, with a **maximum value of 6** per page (accepted range: 1 to 6).
-- The diagram size and the answer space size adjust **dynamically** based on the chosen diagrams-per-page value (fewer diagrams per page = larger diagrams and answer spaces).
+- Diagrams are **sized to fill the column width** and **centered** within their cell (both horizontally and vertically), with a compact writing strip below. The diagram and answer-space sizes adjust **dynamically** based on the chosen diagrams-per-page value (fewer diagrams per page = larger diagrams).
 - The PDF is generated in a print-friendly format (A4 assumed by default, to be confirmed at the technical phase).
 
 ### 3.6 Visual style

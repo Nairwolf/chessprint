@@ -147,29 +147,33 @@ A4 page (595 × 842 pt in PDF coordinates):
 │     Document title (centered)   │  ~40 pt
 ├─────────────────────────────────┤
 │  Exercise grid                  │  remaining space
-│  ┌───────────┐  ┌───────────┐   │
-│  │  Diagram  │  │  Diagram  │   │
-│  │    SVG    │  │    SVG    │   │
-│  ├───────────┤  ├───────────┤   │
-│  │  Answer   │  │  Answer   │   │
-│  │   space   │  │   space   │   │
-│  └───────────┘  └───────────┘   │
-│       ...            ...        │
+│  ┌───────────┐  ┌───────────┐   │  Each cell: the diagram + a
+│  │  Diagram  │  │  Diagram  │   │  compact writing strip form
+│  │    SVG    │  │    SVG    │   │  a block that is centered in
+│  │           │  │           │   │  the cell, both horizontally
+│  │  writing  │  │  writing  │   │  and vertically. Diagrams are
+│  └───────────┘  └───────────┘   │  sized to fill the column
+│       ...            ...        │  width.
 └─────────────────────────────────┘
 ```
 
-Grid: always 2 columns. Number of rows varies from 1 to 3 based on the chosen setting:
+Grid: always 2 columns. Number of rows varies from 1 to 3 based on the chosen setting.
+Diagrams are sized to the smaller of a **width budget** (fill the column, accounting for the
+active-color circle overhang) and a **height budget** (leave room for the optional title and a
+compact writing strip). Approximate diagram sizes:
 
-| Diagrams/page | Columns | Rows | Diagram size (approx.) |
-|---|---|---|---|
-| 1 | 1 centered | 1 | ~350 pt |
-| 2 | 2 | 1 | ~230 pt |
-| 3 | 2 (+ 1 centered) | 2 | ~200 pt |
-| 4 | 2 | 2 | ~200 pt |
-| 5 | 2 (+ 1 centered) | 3 | ~160 pt |
-| 6 | 2 | 3 | ~160 pt |
+| Diagrams/page | Columns | Rows | Diagram size (approx.) | Limited by |
+|---|---|---|---|---|
+| 1 | 1 centered | 1 | ~495 pt | width |
+| 2 | 2 | 1 | ~240 pt | width |
+| 3 | 2 (+ 1 centered) | 2 | ~240 pt | width |
+| 4 | 2 | 2 | ~240 pt | width |
+| 5 | 2 (+ 1 centered) | 3 | ~180 pt | height |
+| 6 | 2 | 3 | ~180 pt | height |
 
-The answer space fills the remaining vertical space below the diagram in each cell.
+The writing space below each diagram is a **compact fixed strip** (`answerHeight`, a small
+fraction of cell height) — not a `flex: 1` filler. Any leftover cell height becomes balanced
+top/bottom margin because the diagram + writing block is vertically centered.
 
 **Single-page containment:** `layout.ts` is the single source of truth for every dimension, and the total content of one page (header + grid) must stay *strictly* below the usable page height. If it exactly equals the available height, `@react-pdf`'s rounding overflows into a blank continuation page. Two rules follow from this:
 

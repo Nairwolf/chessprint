@@ -6,7 +6,6 @@ type Props = {
   exercise: Exercise
   layout: LayoutMetrics
   width: number
-  centered: boolean
 }
 
 const styles = StyleSheet.create({
@@ -15,26 +14,24 @@ const styles = StyleSheet.create({
     marginTop: 4,
     color: '#555555',
   },
-  answerSpace: {
-    flex: 1,
-  },
 })
 
-export default function PdfExercise({ exercise, layout, width, centered }: Props) {
-  const { cellHeight, boardSize } = layout
+export default function PdfExercise({ exercise, layout, width }: Props) {
+  const { cellHeight, boardSize, answerHeight } = layout
 
   return (
     <View
       style={{
         width,
         height: cellHeight,
-        alignItems: centered ? 'center' : 'flex-start',
+        alignItems: 'center',
+        justifyContent: 'center',
         padding: 4,
       }}
     >
       <ChessBoardPdf fen={exercise.fen} size={boardSize} />
       {exercise.title && <Text style={styles.title}>{exercise.title}</Text>}
-      <View style={styles.answerSpace} />
+      <View style={{ height: answerHeight, width: '100%' }} />
     </View>
   )
 }

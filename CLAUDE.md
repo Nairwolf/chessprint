@@ -140,7 +140,9 @@ FEN ; title (optional)
 | 5 | 2 | 3 | Last cell of row 3 centered |
 | 6 | 2 | 3 | |
 
-- Answer space fills the remaining vertical space below the diagram in each cell (free space, no lines, no checkboxes)
+- Each cell centers its content (`alignItems: 'center'` + `justifyContent: 'center'`): the diagram + writing strip block is centered both horizontally and vertically. Diagrams are sized to fill the column width.
+- Diagram size (`boardSize` in `layout.ts`) is `min(widthBudget, heightBudget)`: `widthBudget` fills the column (accounting for the active-color circle overhang, ~7% + a constant); `heightBudget` leaves room for the optional title and a compact writing strip. Never the old `min(cellWidth, cellHeight) * constant`.
+- Answer space is a **compact fixed strip** below the diagram (`answerHeight`, a small fraction of cell height), rendered as a fixed-height `View` — **not** `flex: 1` (which would soak up all leftover height). No lines, no checkboxes.
 - No cover page — exercises start on page 1
 - Page content (header + grid) must stay **strictly** below the usable page height. If it exactly equals the available height, `@react-pdf` rounds up and spills into a blank continuation page. So: the header takes exactly `headerHeight` (use `borderBottom`, never `marginBottom`), and `computeLayout` subtracts a small `safetyPad` from the grid height.
 - Header title centering: the header `View` is a **column** container (default `flexDirection`) with `justifyContent: 'center'` (vertical centering); the title `Text` stretches full-width via the default `alignItems: 'stretch'`, so `textAlign: 'center'` works. Do **not** use a `flexDirection: 'row'` header with `flex: 1` / `width: '100%'` on the `Text` — `@react-pdf` does not reliably stretch a `Text` node to fill a row parent, so `textAlign` has no effect.

@@ -47,7 +47,6 @@ export default function PdfPage({ exercises, layout, documentTitle }: Props) {
               exercise={ex}
               layout={layout}
               width={isCentered(i) ? gridWidth : cellWidth}
-              centered={isCentered(i)}
             />
           ))}
         </View>
