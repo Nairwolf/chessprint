@@ -18,6 +18,27 @@ d003479 chore: scaffold Vite + React 18 + TypeScript project
 
 ---
 
+## Next up — deploy to Vercel (not started)
+
+Raised by the user on 2026-07-14. The next goal is to **host ChessPrint on Vercel**.
+
+The app is a good fit: it's a 100% frontend static site (no backend, no env vars, no
+persistence). The GitHub repo is live at https://github.com/Nairwolf/chessprint, so the
+simplest path is to import that repo into Vercel.
+
+**Deployment notes / expected settings:**
+- Framework preset: **Vite** (Vercel auto-detects it).
+- Build command: `npm run build` — output directory: `dist/`.
+- Install command: `npm install`.
+- It's a pure client-side SPA, so no serverless functions or environment variables are needed.
+- Once connected, every push to `main` will trigger an automatic production deploy.
+
+**Licensing heads-up:** ChessPrint is CC BY-NC-SA 4.0 (the caliente piece set is
+NonCommercial). A public Vercel deployment is fine for personal/non-commercial use, but the
+site must not be used commercially (no ads, no paid access) without replacing the piece set.
+
+---
+
 ## PDF UI polish — diagram layout ✅ DONE (2026-07-14)
 
 Two rounds of PDF layout work on top of the MVP, both committed to `main`.
