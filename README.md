@@ -8,6 +8,8 @@ free space for kids to write or draw their answers by hand.
 ChessPrint is **100% frontend**: a static web app with no backend, no database,
 no accounts, and no persistence. Everything runs in your browser.
 
+**🔗 Live demo: <https://chessprint.nairwolf.net>**
+
 ## Features
 
 - **FEN input** — one exercise per line, format `FEN ; title (optional)`.

@@ -18,24 +18,32 @@ d003479 chore: scaffold Vite + React 18 + TypeScript project
 
 ---
 
-## Next up — deploy to Vercel (not started)
+## Deploy to Vercel ✅ DONE (2026-07-15)
 
-Raised by the user on 2026-07-14. The next goal is to **host ChessPrint on Vercel**.
+**Live at https://chessprint.nairwolf.net** (custom domain, HTTPS).
 
-The app is a good fit: it's a 100% frontend static site (no backend, no env vars, no
-persistence). The GitHub repo is live at https://github.com/Nairwolf/chessprint, so the
-simplest path is to import that repo into Vercel.
+Deployed via Vercel's GitHub integration: the **Nairwolf/chessprint** repo is imported into a
+Vercel project, so every push to `main` triggers an automatic production deploy. No
+`vercel.json` was needed — Vercel auto-detected the **Vite** preset (build `npm run build`,
+output `dist/`, install `npm install`), and the app is a pure client-side SPA with no
+router, so no SPA rewrite or environment variables are required.
 
-**Deployment notes / expected settings:**
-- Framework preset: **Vite** (Vercel auto-detects it).
-- Build command: `npm run build` — output directory: `dist/`.
-- Install command: `npm install`.
-- It's a pure client-side SPA, so no serverless functions or environment variables are needed.
-- Once connected, every push to `main` will trigger an automatic production deploy.
+**Custom domain (chessprint.nairwolf.net):** added in Vercel's *Settings → Domains*, then a
+single **CNAME** record at the registrar (Gandi):
+
+```
+chessprint  CNAME  300  b5197159e0b4bcc5.vercel-dns-017.com.
+```
+
+Vercel issues that unique per-domain CNAME target (not the generic `cname.vercel-dns.com`);
+it resolves to Vercel's anycast IPs and Vercel auto-provisioned the Let's Encrypt cert.
+Verified live: `curl -I https://chessprint.nairwolf.net` → `HTTP/2 200`, `server: Vercel`,
+HSTS present. The rest of the nairwolf.net zone (root `A`, Gandi `MX`/SPF, `blog`, `webmail`,
+`www`) was left untouched.
 
 **Licensing heads-up:** ChessPrint is CC BY-NC-SA 4.0 (the caliente piece set is
-NonCommercial). A public Vercel deployment is fine for personal/non-commercial use, but the
-site must not be used commercially (no ads, no paid access) without replacing the piece set.
+NonCommercial). The public deployment is fine for personal/non-commercial use, but the site
+must not be used commercially (no ads, no paid access) without replacing the piece set.
 
 ---
 
