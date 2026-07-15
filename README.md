@@ -46,6 +46,19 @@ r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3 ; Ruy Lopez
 8/8/8/8/8/5k2/6q1/7K b - - 0 1 ; Mate in one
 ```
 
+## How this was built — 100% vibe-coded
+
+In the spirit of honesty, ChessPrint was **entirely "vibe-coded"** — built by prompting an AI
+coding assistant rather than by hand-writing the code. I did this for two reasons:
+
+- **To experiment with vibe coding** — I wanted to try building a real, complete little app
+  this way and see how far it goes.
+- **To get a tool I actually needed, fast** — I wanted printable chess sheets for personal
+  use quickly, without spending my evenings writing every line myself.
+
+So treat it accordingly: it works and I use it, but it wasn't crafted with the scrutiny of a
+hand-written production codebase. Feedback and improvements are welcome.
+
 ## Tech stack
 
 - **React 18** + **TypeScript** + **Vite** (static build)
