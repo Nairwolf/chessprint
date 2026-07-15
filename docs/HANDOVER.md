@@ -156,6 +156,51 @@ partial page inheriting the stacked layout. `npm run typecheck` + `npm run lint`
 
 ---
 
+## Open idea — kid coloring line-art in empty space (not started)
+
+Raised 2026-07-15. Fill the deliberate empty space (1/page shrunk board, leftover last-page
+cells) with simple black-outline cartoon drawings kids can color in. This is the CLAUDE.md v2
+direction "child-friendly decorations to fill empty space when exercisesPerPage < 6".
+
+**1. Feasibility — yes, cleanly.** Reuse the existing SVG-path machinery. Coloring art is the
+same problem as the pieces (`src/lib/pieces.ts`): pre-flattened SVG paths rendered through
+`@react-pdf` primitives, but as **outlines only** (`stroke="black" fill="none"`) so there's
+white space inside to color. Same discipline as the pieces applies: **no arcs, no gradients,
+no transforms, no `<image>` bitmaps** — `@react-pdf`'s SVG support is partial. Vector line art
+only; **not** raster PNG cartoons (wouldn't be colorable and print poorly).
+
+Proposed shape:
+- `src/lib/coloring.ts` — vendored line-art path data (mirror `pieces.ts`: a `Record` of
+  named art → flattened path layers, fixed viewBox).
+- `src/components/pdf/ColoringArt.tsx` — PDF component, `@react-pdf` SVG primitives only
+  (`<Svg>`, `<Path>` with `stroke`/`fill="none"`). Never mix with web React SVG.
+- Slot into empty cells / leftover last-page space. Decide scope (below).
+
+**2. Sourcing the art.** License matters — the project already carries a NonCommercial
+constraint from the caliente pieces; prefer **CC0** art to avoid stacking another one.
+Best-first: **openclipart.org** (CC0, big simple-cartoon library, already SVG); **SVG Repo**
+Monocolor/Doodle collections (many CC0/MIT, license-filterable); or generate + vectorize your
+own for a consistent themed set. Pipeline for any source: SVG → flatten (SVGO + convert
+arcs/transforms to plain paths, e.g. Inkscape "Object to Path" + "Optimized SVG", or
+`svg-flatten`) → paste path data into `coloring.ts`. Pick a small themed set (~10–20) of
+simple, single-weight outlines — thin outlines survive scaling and B&W printing best.
+
+**3. Random picture per page — yes, but keep it deterministic.** PDF render must stay stable
+across re-renders/re-downloads, so **no `Math.random()` during render** (it would reshuffle
+art and fight React reconciliation). Instead seed selection: `art[pageIndex % art.length]`,
+optionally offset by a per-document seed derived from an exercise `id`. Looks random and
+varied, stays stable.
+
+**Open decisions before implementing:**
+- **Scope** — only the intentional empty space (1/page shrunk board, leftover last-page
+  cells), or decorate every page? CLAUDE.md's idea is specifically `exercisesPerPage < 6`.
+- **License** — confirm CC0 to avoid a second NonCommercial dependency.
+
+Suggested first step: prototype one seeded line-art shape in the leftover space of the
+adaptive last page as a proof of concept, verify via `renderToFile` + `pdftoppm`.
+
+---
+
 ## Dev commands
 
 ```bash
