@@ -121,36 +121,38 @@ Grayscale printing was checked on 2026-07-07 (simulations in `~/chessprint-verif
 
 ---
 
-## Open idea — adapt the last page to its diagram count (not started)
+## Adaptive last page + per-count layout tuning ✅ DONE (2026-07-15)
 
-Raised by the user on 2026-07-14. Today `computeLayout(exercisesPerPage)` is computed **once**
-for the whole document, so a partly-filled final page reuses the full-page layout. Example: 6
-positions at 4/page → page 2 shows only 2 diagrams, but sized as if 4 would fit, wasting space.
+Two ideas (raised 2026-07-14) shipped together, since both live in `computeLayout`.
 
-**Desired rule:** on the final (partial) page, use the layout that matches the number of
-diagrams that actually remain — e.g. 2 leftover diagrams should use the 2-per-page layout.
+**1. Adaptive final page.** `computeLayout` was computed **once** for the whole document, so a
+partly-filled final page reused the full-page layout (6 positions at 4/page → page 2 showed 2
+diagrams sized as if 4 would fit). Now `PdfDocument.tsx` calls `computeLayout` **per page** with
+an effective count = `min(exercisesPerPage, diagramsOnThisPage)`, so the last page adopts the
+layout for the count it actually holds and its diagrams fill the page.
 
-**Implementation sketch:** `PdfDocument.tsx` already slices exercises into per-page groups
-(`App.tsx`/`PdfDocument.tsx`). `computeLayout` would be called per page with an effective count
-= `min(exercisesPerPage, remainingOnThisPage)`, and that page's layout passed to `PdfPage`.
-Watch: the odd-count centering logic (`isCentered` / `centered`) and the single-page
-containment rule (`safetyPad`) must still hold for the recomputed layout. Interacts with the
-"per-layout tuning" idea below — the last page would inherit whatever layout each count uses.
+**2. Per-count table tuning.** The `columns`/`rows` derivation in `computeLayout` became an
+explicit per-count table:
+- **2/page → stacked** (1 col × 2 rows instead of 2 cols × 1 row): board ~240 → ~283pt, using
+  the tall A4 better.
+- **1/page → shrunk** via `boardScale = 0.8` (board ~496 → ~397pt), leaving deliberate empty
+  space (pairs with the v2 kid-decorations direction). The cell centers the *board + writing
+  strip block*, so the shrunk lone board looked ~69pt above the cell's true center; `PdfExercise`
+  now adds a matching spacer above the board in the single-board case (`columns === 1 && rows === 1`)
+  so the board itself is vertically centered (measured board center ~438.5 vs cell center 440).
+- `centered` is now `columns === 2 && count % 2 === 1` (only the 2-column odd counts 3 and 5).
 
-## Open idea — per-count layout tuning (not started)
+Because #1 routes the effective count through `computeLayout`, the last page **inherits** the
+tuned table automatically — e.g. 2 leftover diagrams now stack too.
 
-Raised by the user on 2026-07-14. Some diagrams-per-page layouts could be better:
+Also added a named `ExercisesPerPage` type (`src/types/index.ts`) reused by `ExportConfig` and
+`computeLayout`.
 
-- **2 per page:** prefer **one diagram on top, one on the bottom** (stacked, 1 column × 2 rows)
-  rather than the current 2 columns × 1 row — bigger boards, better use of the tall A4 page.
-  Would make `columns`/`rows` in `computeLayout` a per-count choice rather than the current
-  "1 column only when count is 1, else 2 columns" rule.
-- **1 per page:** the single board is now ~496pt — probably **too big**. Shrink it a bit so
-  there's deliberate empty space, which pairs with the existing v2 direction of adding
-  child-friendly illustrations/decorations to fill the space when the sheet is for kids.
-
-Both are tuning of `computeLayout` (`src/lib/layout.ts`) and would want a fresh render + visual
-check per count. Best done together with the last-page-adaptation idea above.
+**Verified:** rendered all six per-page counts + a 6-at-4/page doc via `renderToFile`; confirmed
+page counts (no blank continuation pages) and rasterized 1/page, 2/page, 3/page, and the adaptive
+page 2 with `pdftoppm` — stacked 2/page, shrunk 1/page, intact odd-count centering, and the
+partial page inheriting the stacked layout. `npm run typecheck` + `npm run lint` pass. Docs
+(SPEC §3.5, ARCHITECTURE §7, CLAUDE.md) updated to match.
 
 ---
 

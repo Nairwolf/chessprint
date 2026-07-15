@@ -13,9 +13,11 @@ export type ParseError = {
 
 export type OrientationMode = 'white' | 'black' | 'auto'
 
+export type ExercisesPerPage = 1 | 2 | 3 | 4 | 5 | 6
+
 export type ExportConfig = {
   documentTitle: string
-  exercisesPerPage: 1 | 2 | 3 | 4 | 5 | 6
+  exercisesPerPage: ExercisesPerPage
   orientation: OrientationMode
 }
 

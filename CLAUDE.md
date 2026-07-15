@@ -132,20 +132,23 @@ FEN ; title (optional)
 ### PDF layout
 - Page size: A4 (595 × 842 pt)
 - Header: document title, **horizontally centered**, repeated on every page, ~40 pt height
-- Grid: always 2 columns, number of rows depends on exercisesPerPage
+- Grid shape (columns × rows) is a per-count table in `computeLayout`, not a formula
 - Sizes are computed in `layout.ts` — no hardcoded sizes in PDF components
 
 | exercisesPerPage | Columns | Rows | Notes |
 |---|---|---|---|
-| 1 | 1 centered | 1 | Single large diagram |
-| 2 | 2 | 1 | |
+| 1 | 1 | 1 | Single diagram, deliberately shrunk (`boardScale 0.8`) to leave empty space |
+| 2 | 1 | 2 | **Stacked** — one diagram on top, one below (bigger boards on the tall A4) |
 | 3 | 2 | 2 | Last cell of row 2 centered |
 | 4 | 2 | 2 | |
 | 5 | 2 | 3 | Last cell of row 3 centered |
 | 6 | 2 | 3 | |
 
+- **Adaptive final page:** `computeLayout` is called **per page** in `PdfDocument.tsx` with an effective count `min(exercisesPerPage, diagramsOnThisPage)`, so a partly-filled last page uses the layout for the number of diagrams it actually holds (e.g. 2 leftovers use the stacked 2/page layout) instead of reusing the full-page sizing.
+- `centered` is `columns === 2 && count % 2 === 1` (only the 2-column odd counts, 3 and 5, center their last cell across the full grid width).
 - Each cell centers its content (`alignItems: 'center'` + `justifyContent: 'center'`): the diagram + writing strip block is centered both horizontally and vertically. Diagrams are sized to fill the column width.
-- Diagram size (`boardSize` in `layout.ts`) is `min(widthBudget, heightBudget)`: `widthBudget` fills the column (accounting for the active-color circle overhang, ~7% + a constant); `heightBudget` leaves room for the optional title and a compact writing strip. Never the old `min(cellWidth, cellHeight) * constant`.
+- **Single-board centering (1/page):** because the writing strip is part of the centered block, it pushes the diagram above the cell's true center — invisible on dense pages but obvious for the lone, shrunk 1/page board. `PdfExercise` detects the single-board case (`columns === 1 && rows === 1`) and adds a matching spacer **above** the board, so the board itself is vertically centered with symmetric empty space and a real writing strip still below. Do not apply this to multi-diagram layouts — the extra spacer would overflow their tighter cells.
+- Diagram size (`boardSize` in `layout.ts`) is `min(widthBudget, heightBudget) * boardScale`: `widthBudget` fills the column (accounting for the active-color circle overhang, ~7% + a constant); `heightBudget` leaves room for the optional title and a compact writing strip; `boardScale` is `0.8` for the 1/page single board (deliberate empty space) and `1` otherwise. Never the old `min(cellWidth, cellHeight) * constant`.
 - Answer space is a **compact fixed strip** below the diagram (`answerHeight`, a small fraction of cell height), rendered as a fixed-height `View` — **not** `flex: 1` (which would soak up all leftover height). No lines, no checkboxes.
 - No cover page — exercises start on page 1
 - Page content (header + grid) must stay **strictly** below the usable page height. If it exactly equals the available height, `@react-pdf` rounds up and spills into a blank continuation page. So: the header takes exactly `headerHeight` (use `borderBottom`, never `marginBottom`), and `computeLayout` subtracts a small `safetyPad` from the grid height.

@@ -1,14 +1,27 @@
-import type { LayoutMetrics } from '../types'
+import type { ExercisesPerPage, LayoutMetrics } from '../types'
 
-export function computeLayout(exercisesPerPage: 1 | 2 | 3 | 4 | 5 | 6): LayoutMetrics {
+export function computeLayout(exercisesPerPage: ExercisesPerPage): LayoutMetrics {
   const pageWidth = 595
   const pageHeight = 842
   const margin = 24
   const headerHeight = 40
 
-  const columns = exercisesPerPage === 1 ? 1 : 2
-  const rows = exercisesPerPage <= 2 ? 1 : exercisesPerPage <= 4 ? 2 : 3
-  const centered = exercisesPerPage % 2 === 1
+  // Per-count grid shape. 2/page is stacked (1 col × 2 rows) rather than
+  // side-by-side, to exploit the tall A4 page for a bigger board.
+  const grid: Record<ExercisesPerPage, { columns: number; rows: number }> = {
+    1: { columns: 1, rows: 1 },
+    2: { columns: 1, rows: 2 },
+    3: { columns: 2, rows: 2 },
+    4: { columns: 2, rows: 2 },
+    5: { columns: 2, rows: 3 },
+    6: { columns: 2, rows: 3 },
+  }
+  const { columns, rows } = grid[exercisesPerPage]
+  const centered = columns === 2 && exercisesPerPage % 2 === 1
+
+  // 1/page: shrink the (otherwise very large) single board so there is
+  // deliberate empty space around it.
+  const boardScale = exercisesPerPage === 1 ? 0.8 : 1
 
   // Reserve a small buffer so header + grid stays strictly below the page's
   // usable height. Without it the content exactly equals the available space
@@ -37,7 +50,7 @@ export function computeLayout(exercisesPerPage: 1 | 2 | 3 | 4 | 5 | 6): LayoutMe
   const answerHeight = cellHeight * answerFrac
   const widthBudget = (innerWidth - circlePad) / circleFactor
   const heightBudget = innerHeight - answerHeight - titleAllow - boardSafety
-  const boardSize = Math.min(widthBudget, heightBudget)
+  const boardSize = Math.min(widthBudget, heightBudget) * boardScale
 
   return {
     pageWidth,

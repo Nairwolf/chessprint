@@ -19,7 +19,14 @@ const styles = StyleSheet.create({
 })
 
 export default function PdfExercise({ exercise, layout, width, orientation }: Props) {
-  const { cellHeight, boardSize, answerHeight } = layout
+  const { cellHeight, boardSize, answerHeight, columns, rows } = layout
+
+  // The cell centers the (board + writing strip) block. For a partly-filled
+  // multi-diagram page that reads as centered, but for the lone 1/page board —
+  // shrunk with lots of slack around it — the invisible strip below pushes the
+  // board visibly above the cell's center. Add a matching spacer above so the
+  // board itself is vertically centered, with a real writing strip still below.
+  const isSingle = columns === 1 && rows === 1
 
   return (
     <View
@@ -31,6 +38,7 @@ export default function PdfExercise({ exercise, layout, width, orientation }: Pr
         padding: 4,
       }}
     >
+      {isSingle && <View style={{ height: answerHeight, width: '100%' }} />}
       <ChessBoardPdf
         fen={exercise.fen}
         size={boardSize}

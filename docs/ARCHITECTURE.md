@@ -163,19 +163,25 @@ A4 page (595 × 842 pt in PDF coordinates):
 └─────────────────────────────────┘
 ```
 
-Grid: always 2 columns. Number of rows varies from 1 to 3 based on the chosen setting.
-Diagrams are sized to the smaller of a **width budget** (fill the column, accounting for the
-active-color circle overhang) and a **height budget** (leave room for the optional title and a
-compact writing strip). Approximate diagram sizes:
+Grid shape (columns × rows) is a **per-count table** in `computeLayout`. Diagrams are sized to
+the smaller of a **width budget** (fill the column, accounting for the active-color circle
+overhang) and a **height budget** (leave room for the optional title and a compact writing
+strip), then multiplied by `boardScale` (`0.8` for the 1/page single board, `1` otherwise).
+Approximate diagram sizes:
 
 | Diagrams/page | Columns | Rows | Diagram size (approx.) | Limited by |
 |---|---|---|---|---|
-| 1 | 1 centered | 1 | ~495 pt | width |
-| 2 | 2 | 1 | ~240 pt | width |
+| 1 | 1 | 1 | ~397 pt | width × 0.8 (shrunk) |
+| 2 | 1 (stacked) | 2 | ~283 pt | height |
 | 3 | 2 (+ 1 centered) | 2 | ~240 pt | width |
 | 4 | 2 | 2 | ~240 pt | width |
 | 5 | 2 (+ 1 centered) | 3 | ~180 pt | height |
 | 6 | 2 | 3 | ~180 pt | height |
+
+**Adaptive final page:** `computeLayout` runs **per page** in `PdfDocument.tsx` with an
+effective count `min(exercisesPerPage, diagramsOnThisPage)`, so a partly-filled last page adopts
+the layout for the count it actually holds (e.g. 2 leftover diagrams use the stacked 2/page
+layout) rather than reusing the full-page sizing.
 
 The writing space below each diagram is a **compact fixed strip** (`answerHeight`, a small
 fraction of cell height) — not a `flex: 1` filler. Any leftover cell height becomes balanced

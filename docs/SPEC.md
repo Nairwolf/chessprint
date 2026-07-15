@@ -64,7 +64,8 @@ For each valid exercise, a chess diagram is generated from the FEN:
 - **Global title as a repeated header** on every page of the PDF (when the document spans multiple pages).
 - **Diagrams per page**: a parameter chosen by the user at export time, with a **maximum value of 6** per page (accepted range: 1 to 6).
 - **Board orientation**: a global parameter chosen by the user — *By turn* (default), *White*, or *Black* — applied to every diagram in both the preview and the exported PDF.
-- Diagrams are **sized to fill the column width** and **centered** within their cell (both horizontally and vertically), with a compact writing strip below. The diagram and answer-space sizes adjust **dynamically** based on the chosen diagrams-per-page value (fewer diagrams per page = larger diagrams).
+- Diagrams are **centered** within their cell (both horizontally and vertically), with a compact writing strip below. The diagram and answer-space sizes adjust **dynamically** based on the chosen diagrams-per-page value (fewer diagrams per page = larger diagrams). The grid shape is tuned per count: **2/page is stacked** (one diagram above the other) to use the tall page, and the **1/page** board is deliberately shrunk to leave empty space.
+- **Adaptive final page**: when the last page is only partly filled, its diagrams are sized using the layout for the number that actually remain (e.g. 2 leftover diagrams use the 2/page stacked layout), so they fill the page instead of reusing the full-page sizing.
 - The PDF is generated in a print-friendly format (A4 assumed by default, to be confirmed at the technical phase).
 
 ### 3.6 Visual style
