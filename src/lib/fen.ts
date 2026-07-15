@@ -2,6 +2,25 @@ export function extractActiveColor(fen: string): 'w' | 'b' {
   return fen.split(' ')[1] === 'b' ? 'b' : 'w'
 }
 
+import type { OrientationMode } from '../types'
+
+export function resolveOrientation(
+  mode: OrientationMode,
+  activeColor: 'w' | 'b',
+): 'w' | 'b' {
+  if (mode === 'white') return 'w'
+  if (mode === 'black') return 'b'
+  return activeColor // 'auto' — by turn
+}
+
+export function orientBoard(
+  board: (string | null)[][],
+  orientation: 'w' | 'b',
+): (string | null)[][] {
+  if (orientation === 'w') return board
+  return board.slice().reverse().map(row => row.slice().reverse())
+}
+
 export function fenToBoard(fen: string): (string | null)[][] {
   const ranks = fen.split(' ')[0].split('/')
   return ranks.map(rank => {

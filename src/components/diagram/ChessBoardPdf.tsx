@@ -1,19 +1,20 @@
 import { Circle, G, Path, Rect, Svg } from '@react-pdf/renderer'
-import { extractActiveColor, fenToBoard } from '../../lib/fen'
+import { extractActiveColor, fenToBoard, orientBoard } from '../../lib/fen'
 import { PIECES } from '../../lib/pieces'
 import type { PieceKey } from '../../types'
 
 type Props = {
   fen: string
   size: number
+  orientation: 'w' | 'b'
 }
 
 const LIGHT_SQ = '#f0d9b5'
 const DARK_SQ = '#b58863'
 
-export default function ChessBoardPdf({ fen, size }: Props) {
-  const board = fenToBoard(fen)
+export default function ChessBoardPdf({ fen, size, orientation }: Props) {
   const activeColor = extractActiveColor(fen)
+  const board = orientBoard(fenToBoard(fen), orientation)
   const sq = size / 8
   const indicatorR = sq * 0.28
   const svgWidth = size + indicatorR * 2 + 8

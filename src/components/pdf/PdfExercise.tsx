@@ -1,11 +1,13 @@
 import { StyleSheet, Text, View } from '@react-pdf/renderer'
-import type { Exercise, LayoutMetrics } from '../../types'
+import { resolveOrientation } from '../../lib/fen'
+import type { Exercise, LayoutMetrics, OrientationMode } from '../../types'
 import ChessBoardPdf from '../diagram/ChessBoardPdf'
 
 type Props = {
   exercise: Exercise
   layout: LayoutMetrics
   width: number
+  orientation: OrientationMode
 }
 
 const styles = StyleSheet.create({
@@ -16,7 +18,7 @@ const styles = StyleSheet.create({
   },
 })
 
-export default function PdfExercise({ exercise, layout, width }: Props) {
+export default function PdfExercise({ exercise, layout, width, orientation }: Props) {
   const { cellHeight, boardSize, answerHeight } = layout
 
   return (
@@ -29,7 +31,11 @@ export default function PdfExercise({ exercise, layout, width }: Props) {
         padding: 4,
       }}
     >
-      <ChessBoardPdf fen={exercise.fen} size={boardSize} />
+      <ChessBoardPdf
+        fen={exercise.fen}
+        size={boardSize}
+        orientation={resolveOrientation(orientation, exercise.activeColor)}
+      />
       {exercise.title && <Text style={styles.title}>{exercise.title}</Text>}
       <View style={{ height: answerHeight, width: '100%' }} />
     </View>

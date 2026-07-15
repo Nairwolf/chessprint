@@ -9,7 +9,7 @@ Browser
 ├── User Interface (React + TypeScript)
 │   ├── Input form (document title, FEN list)
 │   ├── Real-time preview
-│   └── Export settings (diagrams per page)
+│   └── Export settings (diagrams per page, board orientation)
 ├── Parsing & Validation (chess.js)
 │   ├── Parses each "FEN ; title" line
 │   └── Validates the FEN, blocks export on error
@@ -42,7 +42,7 @@ chessprint/
 │   ├── components/
 │   │   ├── ui/
 │   │   │   ├── ExerciseForm.tsx     # Main form (title + FEN textarea)
-│   │   │   ├── ExportControls.tsx   # Diagrams-per-page selector + export button
+│   │   │   ├── ExportControls.tsx   # Diagrams-per-page selector + orientation toggle + export button
 │   │   │   ├── ErrorMessage.tsx     # Blocking error display (faulty line)
 │   │   │   └── Preview.tsx          # Exercise list preview
 │   │   ├── diagram/
@@ -87,10 +87,14 @@ type ParseError = {
   reason: string; // Error description (e.g. "invalid FEN: wrong number of ranks")
 };
 
+// Board orientation mode (chosen globally by the user)
+type OrientationMode = 'white' | 'black' | 'auto'; // 'auto' = by turn
+
 // Parameters chosen at export time
 type ExportConfig = {
   documentTitle: string;
   exercisesPerPage: 1 | 2 | 3 | 4 | 5 | 6;
+  orientation: OrientationMode;
 };
 ```
 
@@ -132,7 +136,9 @@ The diagram is an SVG generated in React from the FEN. Two distinct components a
 
 **Piece rendering:** pieces are drawn as SVG vector paths. The piece set is Lichess's **caliente** (by avi, CC BY-NC-SA 4.0 — see `NOTICE`; non-commercial use only), vendored as generated data in `src/lib/pieces.ts`: `PIECES: Record<PieceKey, PieceLayer[]>` on a 45×45 viewBox. Each piece is an ordered array of layers (path + fill/stroke/opacity); white and black pieces are distinct artwork keyed by the raw FEN letter. The data is pre-flattened for `@react-pdf` compatibility: transforms baked into the geometry, single-stop gradients resolved to solid fills, circles/ellipses converted to cubic béziers, no arc commands. This guarantees identical rendering in the web SVG and the PDF at any size, with no dependency on Unicode fonts whose rendering is inconsistent across operating systems.
 
-**Active color indicator:** a filled circle (filled black = Black to play, white with border = White to play) displayed outside the board, bottom right. Extracted automatically from the FEN's `activeColor` field.
+**Active color indicator:** a filled circle (filled black = Black to play, white with border = White to play) displayed outside the board, bottom right. Extracted automatically from the FEN's `activeColor` field, independently of board orientation.
+
+**Board orientation:** both diagram components take an explicit `orientation: 'w' | 'b'` prop and flip the grid via `orientBoard()` in `src/lib/fen.ts` (a Black orientation reverses both the rank and file order — a 180° rotation). The user picks a mode (`'white' | 'black' | 'auto'`) once; each render site resolves it to a concrete `'w' | 'b'` with `resolveOrientation(mode, activeColor)` — `'auto'` yields the exercise's own side to move. The indicator circle is unaffected by orientation.
 
 **No coordinates** (no letters a-h, no numbers 1-8) in v1.
 

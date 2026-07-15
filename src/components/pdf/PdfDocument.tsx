@@ -9,7 +9,7 @@ type Props = {
 }
 
 export default function PdfDocument({ exercises, config }: Props) {
-  const { documentTitle, exercisesPerPage } = config
+  const { documentTitle, exercisesPerPage, orientation } = config
   const layout = computeLayout(exercisesPerPage)
 
   const pages: Exercise[][] = []
@@ -25,6 +25,7 @@ export default function PdfDocument({ exercises, config }: Props) {
           exercises={pageExercises}
           layout={layout}
           documentTitle={documentTitle}
+          orientation={orientation}
         />
       ))}
     </Document>

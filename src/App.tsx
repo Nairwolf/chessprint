@@ -7,12 +7,13 @@ import Preview from './components/ui/Preview'
 import PdfDocument from './components/pdf/PdfDocument'
 import { parseInput } from './lib/parser'
 import { validateExercises } from './lib/validator'
-import type { Exercise, ParseError, ExportConfig } from './types'
+import type { Exercise, ParseError, ExportConfig, OrientationMode } from './types'
 
 export default function App() {
   const [documentTitle, setDocumentTitle] = useState('')
   const [fenText, setFenText] = useState('')
   const [exercisesPerPage, setExercisesPerPage] = useState<ExportConfig['exercisesPerPage']>(4)
+  const [orientation, setOrientation] = useState<OrientationMode>('auto')
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [errors, setErrors] = useState<ParseError[]>([])
 
@@ -32,7 +33,7 @@ export default function App() {
     if (errs.length > 0) return
 
     const blob = await pdf(
-      <PdfDocument exercises={exs} config={{ documentTitle, exercisesPerPage }} />
+      <PdfDocument exercises={exs} config={{ documentTitle, exercisesPerPage, orientation }} />
     ).toBlob()
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -60,12 +61,14 @@ export default function App() {
             <ExportControls
               exercisesPerPage={exercisesPerPage}
               onExercisesPerPageChange={setExercisesPerPage}
+              orientation={orientation}
+              onOrientationChange={setOrientation}
               onExport={handleExport}
               disabled={errors.length > 0 || exercises.length === 0}
             />
           </div>
           <div>
-            <Preview exercises={exercises} />
+            <Preview exercises={exercises} orientation={orientation} />
           </div>
         </div>
       </main>

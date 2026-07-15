@@ -88,9 +88,12 @@ type ParseError = {
   reason: string; // Human-readable error description
 };
 
+type OrientationMode = 'white' | 'black' | 'auto'; // 'auto' = by turn (side to move)
+
 type ExportConfig = {
   documentTitle: string;
   exercisesPerPage: 1 | 2 | 3 | 4 | 5 | 6;
+  orientation: OrientationMode;
 };
 ```
 
@@ -119,6 +122,7 @@ FEN ; title (optional)
 - Pieces are rendered as **SVG vector paths**, never as Unicode characters
 - Piece set: Lichess **caliente** (CC BY-NC-SA 4.0, attribution in `NOTICE` — non-commercial use only), vendored as generated layered-path data in `src/lib/pieces.ts` (`PIECES: Record<PieceKey, PieceLayer[]>`, 45×45 viewBox). Do not edit that file by hand; the data is pre-flattened (no arcs, no gradients, no transforms) so it renders identically in web SVG and `@react-pdf`
 - **No board coordinates** in v1 (no a-h letters, no 1-8 numbers)
+- **Board orientation**: both `ChessBoard.tsx` and `ChessBoardPdf.tsx` take an explicit `orientation: 'w' | 'b'` prop and flip the grid via `orientBoard()` in `src/lib/fen.ts`. The user picks a mode (`ExportConfig.orientation: 'white' | 'black' | 'auto'`); resolve it per exercise with `resolveOrientation(mode, activeColor)` (`'auto'` = side to move). The active-color indicator circle is independent of orientation — always driven by the FEN's real side to move
 - Active color indicator: a filled circle outside the board, bottom-right corner
   - Black filled circle = Black to play
   - White circle with dark border = White to play

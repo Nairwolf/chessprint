@@ -18,6 +18,29 @@ d003479 chore: scaffold Vite + React 18 + TypeScript project
 
 ---
 
+## Board orientation ✅ DONE (2026-07-15)
+
+Diagrams can now be oriented from White's side, from Black's side, or **by turn** (default —
+the side to move sits at the bottom). Built in two steps:
+
+1. Automatic by-turn orientation. `orientBoard(board, 'w' | 'b')` in `src/lib/fen.ts` flips
+   the board for Black (reverses both rank and file order = 180° rotation).
+2. User-selectable mode. A segmented control (**By turn · White · Black**) in
+   `ExportControls.tsx` drives an `orientation` state in `App.tsx`, threaded into both the
+   preview and the PDF config (`ExportConfig.orientation: OrientationMode`).
+
+`resolveOrientation(mode, activeColor)` (in `fen.ts`) maps the mode to a concrete `'w' | 'b'`
+at each render site (`Preview.tsx`, `PdfExercise.tsx`), where the exercise's `activeColor` is
+known; `'auto'` returns the side to move. Both `ChessBoard.tsx` and `ChessBoardPdf.tsx` take an
+explicit `orientation: 'w' | 'b'` prop for the flip. The active-color indicator circle stays
+tied to the real side to move and remains at the bottom-right in every mode.
+
+**Verified:** user confirmed preview + PDF across all three modes for White-to-play and
+Black-to-play positions. `npm run typecheck` + `npm run lint` pass. Docs (SPEC §3.3/§3.5,
+ARCHITECTURE §4/§6, CLAUDE.md) updated to match.
+
+---
+
 ## Deploy to Vercel ✅ DONE (2026-07-15)
 
 **Live at https://chessprint.nairwolf.net** (custom domain, HTTPS).

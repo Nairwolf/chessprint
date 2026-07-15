@@ -1,11 +1,13 @@
-import type { Exercise } from '../../types'
+import { resolveOrientation } from '../../lib/fen'
+import type { Exercise, OrientationMode } from '../../types'
 import ChessBoard from '../diagram/ChessBoard'
 
 type Props = {
   exercises: Exercise[]
+  orientation: OrientationMode
 }
 
-export default function Preview({ exercises }: Props) {
+export default function Preview({ exercises, orientation }: Props) {
   if (exercises.length === 0) return null
 
   return (
@@ -16,7 +18,11 @@ export default function Preview({ exercises }: Props) {
       <ul className="flex flex-col gap-3">
         {exercises.map((ex, i) => (
           <li key={ex.id} className="flex items-center gap-3">
-            <ChessBoard fen={ex.fen} size={96} />
+            <ChessBoard
+              fen={ex.fen}
+              size={96}
+              orientation={resolveOrientation(orientation, ex.activeColor)}
+            />
             <span className="text-sm text-gray-700">
               {ex.title ?? `Exercise ${i + 1}`}
             </span>

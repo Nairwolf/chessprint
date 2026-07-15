@@ -1,11 +1,12 @@
 import { Page, StyleSheet, Text, View } from '@react-pdf/renderer'
-import type { Exercise, LayoutMetrics } from '../../types'
+import type { Exercise, LayoutMetrics, OrientationMode } from '../../types'
 import PdfExercise from './PdfExercise'
 
 type Props = {
   exercises: Exercise[]
   layout: LayoutMetrics
   documentTitle: string
+  orientation: OrientationMode
 }
 
 const styles = StyleSheet.create({
@@ -26,7 +27,7 @@ const styles = StyleSheet.create({
   },
 })
 
-export default function PdfPage({ exercises, layout, documentTitle }: Props) {
+export default function PdfPage({ exercises, layout, documentTitle, orientation }: Props) {
   const { margin, headerHeight, cellWidth, centered, columns } = layout
   const gridWidth = cellWidth * columns
 
@@ -47,6 +48,7 @@ export default function PdfPage({ exercises, layout, documentTitle }: Props) {
               exercise={ex}
               layout={layout}
               width={isCentered(i) ? gridWidth : cellWidth}
+              orientation={orientation}
             />
           ))}
         </View>

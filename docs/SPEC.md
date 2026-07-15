@@ -50,6 +50,7 @@ For each valid exercise, a chess diagram is generated from the FEN:
 - 8×8 board with pieces positioned according to the FEN.
 - **No coordinates** displayed on the border (no letters a-h, no numbers 1-8) in v1.
 - **Active color indicator**: a visual symbol (to be defined at design time — e.g. a black/white dot) displayed outside the board, indicating whose turn it is to play. This information is derived automatically from the FEN; the user inputs nothing extra.
+- **Board orientation**: the diagram can be drawn from White's side, from Black's side, or oriented toward whoever is to move. The mode is chosen globally by the user (see 3.5); the default is **by turn** (the side to move sits at the bottom). The orientation only rotates the 8×8 grid — the active-color indicator still reflects the real side to move and stays at the bottom-right corner.
 - Diagram sized for child use: squares large enough to allow writing or drawing on or just below them.
 
 ### 3.4 Answer space
@@ -62,6 +63,7 @@ For each valid exercise, a chess diagram is generated from the FEN:
 - **No cover page**: the document starts directly with the exercises.
 - **Global title as a repeated header** on every page of the PDF (when the document spans multiple pages).
 - **Diagrams per page**: a parameter chosen by the user at export time, with a **maximum value of 6** per page (accepted range: 1 to 6).
+- **Board orientation**: a global parameter chosen by the user — *By turn* (default), *White*, or *Black* — applied to every diagram in both the preview and the exported PDF.
 - Diagrams are **sized to fill the column width** and **centered** within their cell (both horizontally and vertically), with a compact writing strip below. The diagram and answer-space sizes adjust **dynamically** based on the chosen diagrams-per-page value (fewer diagrams per page = larger diagrams).
 - The PDF is generated in a print-friendly format (A4 assumed by default, to be confirmed at the technical phase).
 
