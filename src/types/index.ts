@@ -19,6 +19,7 @@ export type ExportConfig = {
   documentTitle: string
   exercisesPerPage: ExercisesPerPage
   orientation: OrientationMode
+  allowMissingKings: boolean
 }
 
 export type ParsedLine = {

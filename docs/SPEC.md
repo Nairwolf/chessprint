@@ -42,6 +42,10 @@ The user fills in two elements:
 - If a line contains an invalid FEN (incorrect syntax, wrong number of squares, etc.), the export is **entirely blocked**.
 - The error message must clearly indicate **the faulty line number**, and when possible the nature of the error (malformed FEN, missing field, etc.).
 - No partial export is generated as long as a validation error is present.
+- **Allow positions without kings** (opt-in): an off-by-default toggle lets the user accept
+  otherwise-legal positions that are missing one or both kings, for educational sheets (e.g.
+  isolated material). Only the king requirement is relaxed — all other checks still apply, so
+  malformed FENs, pawns on the back rank, and positions with *too many* kings remain blocked.
 
 ### 3.3 Diagram generation
 

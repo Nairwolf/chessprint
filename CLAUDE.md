@@ -117,6 +117,7 @@ FEN ; title (optional)
 - Return all errors at once (not just the first one)
 - Each `ParseError` must include the 1-indexed line number and a clear reason
 - Validation is triggered on input with a ~300ms debounce, and again on export click
+- **Allow missing kings** (`ExportConfig.allowMissingKings`, off by default): when enabled, a FEN that chess.js rejects is retried with phantom kings inserted on empty squares (`withPlaceholderKings` in `src/lib/fen.ts`). If the patched FEN validates, the original (kingless) FEN is accepted for rendering; otherwise the patched attempt's error is reported. This relaxes **only** the king-count check — malformed FENs, back-rank pawns, and *too many* kings stay blocked. Rendering needs no changes: `fenToBoard` parses the raw FEN and never calls chess.js
 
 ### Diagram rendering
 - Pieces are rendered as **SVG vector paths**, never as Unicode characters

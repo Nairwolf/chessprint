@@ -5,6 +5,8 @@ type Props = {
   onExercisesPerPageChange: (n: ExportConfig['exercisesPerPage']) => void
   orientation: OrientationMode
   onOrientationChange: (m: OrientationMode) => void
+  allowMissingKings: boolean
+  onAllowMissingKingsChange: (b: boolean) => void
   onExport: () => void
   disabled: boolean
 }
@@ -22,6 +24,8 @@ export default function ExportControls({
   onExercisesPerPageChange,
   orientation,
   onOrientationChange,
+  allowMissingKings,
+  onAllowMissingKingsChange,
   onExport,
   disabled,
 }: Props) {
@@ -69,6 +73,16 @@ export default function ExportControls({
           ))}
         </div>
       </div>
+
+      <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+        <input
+          type="checkbox"
+          checked={allowMissingKings}
+          onChange={e => onAllowMissingKingsChange(e.target.checked)}
+          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+        Allow positions without kings
+      </label>
 
       <button
         onClick={onExport}

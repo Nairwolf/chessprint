@@ -14,26 +14,36 @@ export default function App() {
   const [fenText, setFenText] = useState('')
   const [exercisesPerPage, setExercisesPerPage] = useState<ExportConfig['exercisesPerPage']>(4)
   const [orientation, setOrientation] = useState<OrientationMode>('auto')
+  const [allowMissingKings, setAllowMissingKings] = useState(false)
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [errors, setErrors] = useState<ParseError[]>([])
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const { exercises: exs, errors: errs } = validateExercises(parseInput(fenText))
+      const { exercises: exs, errors: errs } = validateExercises(
+        parseInput(fenText),
+        allowMissingKings
+      )
       setExercises(exs)
       setErrors(errs)
     }, 300)
     return () => clearTimeout(timer)
-  }, [fenText])
+  }, [fenText, allowMissingKings])
 
   async function handleExport() {
-    const { exercises: exs, errors: errs } = validateExercises(parseInput(fenText))
+    const { exercises: exs, errors: errs } = validateExercises(
+      parseInput(fenText),
+      allowMissingKings
+    )
     setExercises(exs)
     setErrors(errs)
     if (errs.length > 0) return
 
     const blob = await pdf(
-      <PdfDocument exercises={exs} config={{ documentTitle, exercisesPerPage, orientation }} />
+      <PdfDocument
+        exercises={exs}
+        config={{ documentTitle, exercisesPerPage, orientation, allowMissingKings }}
+      />
     ).toBlob()
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -63,6 +73,8 @@ export default function App() {
               onExercisesPerPageChange={setExercisesPerPage}
               orientation={orientation}
               onOrientationChange={setOrientation}
+              allowMissingKings={allowMissingKings}
+              onAllowMissingKingsChange={setAllowMissingKings}
               onExport={handleExport}
               disabled={errors.length > 0 || exercises.length === 0}
             />
