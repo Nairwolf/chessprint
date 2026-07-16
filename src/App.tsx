@@ -13,7 +13,7 @@ import type { Exercise, ParseError, ExportConfig, OrientationMode } from './type
 export default function App() {
   const [documentTitle, setDocumentTitle] = useState('')
   const [fenText, setFenText] = useState('')
-  const [exercisesPerPage, setExercisesPerPage] = useState<ExportConfig['exercisesPerPage']>(4)
+  const [exercisesPerPage, setExercisesPerPage] = useState<ExportConfig['exercisesPerPage']>(6)
   const [orientation, setOrientation] = useState<OrientationMode>('auto')
   const [allowMissingKings, setAllowMissingKings] = useState(false)
   const [exercises, setExercises] = useState<Exercise[]>([])
