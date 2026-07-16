@@ -156,6 +156,29 @@ partial page inheriting the stacked layout. `npm run typecheck` + `npm run lint`
 
 ---
 
+## Lichess puzzle import ✅ DONE (2026-07-16)
+
+A collapsible "Load puzzles from Lichess" panel (`src/components/ui/LichessImport.tsx`) below
+the exercise textarea fetches random puzzles anonymously from
+`GET https://lichess.org/api/puzzle/batch/{theme}?nb={1-30}&difficulty={easiest…hardest}`
+(CORS `*`, no auth — the app's only network call). Logic lives in `src/lib/lichess.ts`:
+curated `LICHESS_THEMES` / `LICHESS_DIFFICULTIES`, `pgnToFen` (replays the truncated SAN
+movetext move-by-move — `chess.loadPgn` won't parse it, no move numbers), `fetchLichessPuzzles`
+(dedupes by id within a batch, skips unreplayable PGNs, friendly errors incl. 429), and
+`puzzlesToLines`. Loaded puzzles are **appended** to `fenText` as normal lines
+`FEN ; Lichess <id> (<rating>)`, so preview/validation/PDF need no changes; the panel also
+shows an ephemeral result list (id linked to `lichess.org/training/<id>` + rating).
+
+**Verified (headless Chromium, recipe saved in `.claude/skills/verify/SKILL.md`):** two batches
+append correctly; a loaded FEN cross-checked against `GET /api/puzzle/<id>` matches the puzzle
+position; network failure shows a clean in-panel error without touching the textarea; PDF
+export with 5 loaded puzzles renders titles/indicators/adaptive last page correctly.
+
+**Known minor limitation:** duplicates across separate anonymous batches are possible (the API
+only guarantees no-repeats for authenticated users); duplicates within one batch are filtered.
+
+---
+
 ## Open idea — kid coloring line-art in empty space (not started)
 
 Raised 2026-07-15. Fill the deliberate empty space (1/page shrunk board, leftover last-page

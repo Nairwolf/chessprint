@@ -13,6 +13,11 @@ no accounts, and no persistence. Everything runs in your browser.
 ## Features
 
 - **FEN input** — one exercise per line, format `FEN ; title (optional)`.
+- **Lichess puzzle import** — load random puzzles straight from the
+  [Lichess](https://lichess.org) public API: pick a theme (mate in 1/2, fork,
+  pin, …), a difficulty, and how many; they are appended to your list as
+  regular FEN lines titled `Lichess <id> (<rating>)`, with links back to each
+  puzzle on lichess.org. No account or API key needed.
 - **Automatic active-color detection** — who plays (White/Black) is read from the
   FEN and shown as a dot outside the board; you never type it in.
 - **Strict validation** — every FEN is validated with [chess.js](https://github.com/jhlywa/chess.js).
@@ -90,10 +95,10 @@ npm run lint       # ESLint
 ```
 src/
 ├── components/
-│   ├── ui/          # ExerciseForm, ExportControls, ErrorMessage, Preview
+│   ├── ui/          # ExerciseForm, ExportControls, ErrorMessage, Preview, LichessImport
 │   ├── diagram/     # ChessBoard (web SVG) + ChessBoardPdf (@react-pdf SVG)
 │   └── pdf/         # PdfDocument, PdfPage, PdfExercise
-├── lib/             # parser, validator, fen, layout, pieces (SVG path data)
+├── lib/             # parser, validator, fen, layout, lichess (puzzle API), pieces (SVG path data)
 ├── types/           # shared types (Exercise, ParseError, ExportConfig)
 └── App.tsx          # root component, global state
 ```
