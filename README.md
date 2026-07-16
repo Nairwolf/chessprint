@@ -13,11 +13,12 @@ no accounts, and no persistence. Everything runs in your browser.
 ## Features
 
 - **FEN input** — one exercise per line, format `FEN ; title (optional)`.
-- **Lichess puzzle import** — load random puzzles straight from the
-  [Lichess](https://lichess.org) public API: pick a theme (mate in 1/2, fork,
-  pin, …), a difficulty, and how many; they are appended to your list as
-  regular FEN lines titled `Lichess <id> (<rating>)`, with links back to each
-  puzzle on lichess.org. No account or API key needed.
+- **Lichess puzzle import** — load random [Lichess](https://lichess.org)
+  puzzles by theme (mate in 1/2, fork, pin, …) and **rating range** (e.g.
+  800–1200): they are appended to your list as regular FEN lines titled
+  `Lichess <id> (<rating>)`, with links back to each puzzle on lichess.org.
+  Served from a static index rebuilt monthly from the CC0 Lichess puzzle
+  database — no account, no API key, no rate limits.
 - **Automatic active-color detection** — who plays (White/Black) is read from the
   FEN and shown as a dot outside the board; you never type it in.
 - **Strict validation** — every FEN is validated with [chess.js](https://github.com/jhlywa/chess.js).

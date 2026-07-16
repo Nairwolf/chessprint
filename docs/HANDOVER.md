@@ -177,6 +177,44 @@ export with 5 loaded puzzles renders titles/indicators/adaptive last page correc
 **Known minor limitation:** duplicates across separate anonymous batches are possible (the API
 only guarantees no-repeats for authenticated users); duplicates within one batch are filtered.
 
+> **Superseded (2026-07-16):** the batch-API path (difficulty buckets, `fetchLichessPuzzles`,
+> `pgnToFen`) was replaced the same day by the static puzzle index below. The panel UX
+> (theme/count, appended `FEN ; Lichess <id> (<rating>)` lines, result list) is unchanged.
+
+---
+
+## Rating-range selection via static puzzle index ✅ DONE (2026-07-16)
+
+Users pick a **rating range** (min–max, 500–3200, step 100) instead of the old five difficulty
+buckets (which were relative to an invisible 1500 anchor). The Lichess live API cannot filter
+by rating (lila #16694, closed *not planned*), so puzzles now come from a **static index**:
+
+- **Build:** `npm run build:index` → `tools/build-puzzle-index.ts` (tsx devDep). Streams
+  `lichess_db_puzzle.csv.zst` (~6.1M rows, CC0) via `curl | zstd -d`, keeps quality puzzles
+  (`RD < 90`, `Popularity > 80`, `NbPlays > 100` — 3.59M pass), reservoir-samples 1,000 per
+  100-pt band, then applies `Moves[0]` to each sampled CSV FEN (the CSV FEN is the position
+  *before* the opponent's setup move) and validates with chess.js. Output:
+  `public/puzzle-index/<band>.json` (bare array of `IndexEntry = [id, fen, rating, themeMask]`,
+  ~75 KB raw / ~31 KB gzipped each) + `manifest.json`. Whole index ≈ 1.9 MB, committed.
+- **Rebuild:** `.github/workflows/rebuild-puzzle-index.yml`, monthly cron (6th, day after the
+  Lichess export) + `workflow_dispatch`; commits only if changed; Vercel deploys on push.
+- **Runtime:** `src/lib/puzzleIndex.ts` — `bandsFor`/`loadPool` (same-origin fetch of 1–3 band
+  files; missing band → empty; all missing → friendly error) and `samplePuzzles` (theme
+  bitmask via `THEME_BITS` in `src/lib/lichess.ts`, shared with the indexer; excludes ids
+  already in the textarea, which fixes the old duplicate limitation). Zero runtime network
+  calls to lichess.org.
+- **UI:** `LichessImport.tsx` — Difficulty select replaced by two Rating selects (defaults
+  600–1500); min/max swapped if inverted; "Only M of N available" note on sparse selections.
+- Ratings are dump-fresh (≤ ~2 months stale) — fine for printed labels; the RD filter selects
+  mature puzzles whose ratings drift slowly (spot-check: 19-pt drift on a sampled puzzle).
+- Design history: an earlier draft plan (`docs/chessprint-rating-range-plan.md`, from a
+  Claude Chat discussion) proposed per-id live API fetches with live-rating verification;
+  it was reviewed, simplified to this static approach, and the draft file removed.
+
+**Verified:** indexer run on the full dump (28 bands, no dropped FENs); sampled FEN + theme
+mask cross-checked against `GET /api/puzzle/{id}`; headless-browser flow (load, range
+compliance, dedupe on reload, sparse-range note, index-unreachable error, PDF export).
+
 ---
 
 ## Open idea — kid coloring line-art in empty space (not started)

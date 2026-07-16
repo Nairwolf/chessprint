@@ -226,7 +226,7 @@ If the following features are added, a Go backend will be required:
 |---|---|
 | Cross-device sheet saving | Server storage (PostgreSQL) + Go REST API |
 | Short URL sharing | Server storage + slug generation |
-| Import from a Lichess study | Feasible in pure frontend (public API, no CORS) — random-puzzle import by theme/difficulty is already implemented in `src/lib/lichess.ts` + `LichessImport.tsx` via `GET /api/puzzle/batch/{theme}` (anonymous, CORS `*`) |
+| Import from a Lichess study | Feasible in pure frontend (public API, no CORS) — random-puzzle import by theme/rating range is already implemented via a static puzzle index (`public/puzzle-index/`, built monthly by CI from the CC0 Lichess DB dump; runtime client in `src/lib/puzzleIndex.ts`, UI in `LichessImport.tsx`). The live API is not used at runtime (it cannot filter by rating) |
 | High-fidelity PDF generation | Go backend + headless Chromium (`go-rod`) |
 
 The current frontend will not need to be rewritten: v2 additions plug in by replacing local calls with API calls.

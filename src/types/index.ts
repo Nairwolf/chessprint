@@ -28,14 +28,14 @@ export type ParsedLine = {
   lineNumber: number
 }
 
-export type LichessDifficulty = 'easiest' | 'easier' | 'normal' | 'harder' | 'hardest'
-
 export type LichessPuzzle = {
   id: string
   fen: string
   rating: number
-  themes: string[]
 }
+
+// One puzzle in a static index band file: [id, solver-facing FEN, rating, theme bitmask]
+export type IndexEntry = [string, string, number, number]
 
 export type PieceKey = 'K' | 'Q' | 'R' | 'B' | 'N' | 'P' | 'k' | 'q' | 'r' | 'b' | 'n' | 'p'
 

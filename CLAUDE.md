@@ -35,7 +35,10 @@ npm run preview    # Preview production build locally
 ```
 chessprint/
 ├── public/
-│   └── fonts/                  # Fonts embedded in @react-pdf PDFs
+│   ├── fonts/                  # Fonts embedded in @react-pdf PDFs
+│   └── puzzle-index/           # Generated static puzzle index (band JSONs + manifest) — do not edit by hand
+├── tools/
+│   └── build-puzzle-index.ts   # Index builder (npm run build:index), run monthly by CI
 ├── src/
 │   ├── components/
 │   │   ├── ui/
@@ -55,7 +58,8 @@ chessprint/
 │   │   ├── parser.ts            # Splits lines on ";", extracts FEN and optional title
 │   │   ├── validator.ts         # Validates each FEN via chess.js, returns ParseError[]
 │   │   ├── fen.ts               # FEN utilities (extract active color, piece positions)
-│   │   ├── lichess.ts           # Lichess puzzle API client (batch fetch, PGN→FEN, line formatting)
+│   │   ├── lichess.ts           # Lichess theme constants (THEME_BITS shared with indexer) + line formatting
+│   │   ├── puzzleIndex.ts       # Static puzzle index client (band loading, rating filter, sampling)
 │   │   └── layout.ts            # Computes dynamic sizes from exercisesPerPage (1–6)
 │   ├── types/
 │   │   └── index.ts             # Shared types: Exercise, ParseError, ExportConfig
@@ -121,10 +125,12 @@ FEN ; title (optional)
 - Validation is triggered on input with a ~300ms debounce, and again on export click
 - **Allow missing kings** (`ExportConfig.allowMissingKings`, off by default): when enabled, a FEN that chess.js rejects is retried with phantom kings inserted on empty squares (`withPlaceholderKings` in `src/lib/fen.ts`). If the patched FEN validates, the original (kingless) FEN is accepted for rendering; otherwise the patched attempt's error is reported. This relaxes **only** the king-count check — malformed FENs, back-rank pawns, and *too many* kings stay blocked. Rendering needs no changes: `fenToBoard` parses the raw FEN and never calls chess.js
 
-### Lichess puzzle import
-- `LichessImport.tsx` (below the textarea) fetches random puzzles anonymously from `GET https://lichess.org/api/puzzle/batch/{theme}?nb={1-30}&difficulty={easiest|easier|normal|harder|hardest}` (CORS `*`, no auth). This is the app's **only** network call.
-- All logic lives in `src/lib/lichess.ts`: curated `LICHESS_THEMES`, `LICHESS_DIFFICULTIES`, `pgnToFen` (replays the truncated SAN movetext move-by-move — do **not** use `chess.loadPgn`, the movetext has no move numbers), `fetchLichessPuzzles` (dedupes by id, skips unreplayable PGNs, friendly errors incl. 429), `puzzlesToLines`.
-- Loaded puzzles are **appended** to `fenText` as normal input lines `FEN ; Lichess <id> (<rating>)` — no special downstream handling; the panel also shows an ephemeral result list (id linked to `lichess.org/training/<id>` + rating).
+### Lichess puzzle import (static index)
+- `LichessImport.tsx` (below the textarea) loads random puzzles by **theme + rating range [min, max] + count** from a **static, pre-built index** served from `public/puzzle-index/` — no Lichess API calls at runtime (the live API cannot filter by rating). Band files are same-origin fetches (~31 KB gzipped each).
+- Index format: one JSON file per 100-pt rating band (`1600.json` = ratings 1600–1699), each a bare array of `IndexEntry = [id, fen, rating, themeMask]`, plus `manifest.json` (build metadata). FENs are already **solver-facing**: the Lichess CSV FEN is the position *before* the opponent's setup move, and the indexer applies `Moves[0]` at build time.
+- Runtime logic in `src/lib/puzzleIndex.ts`: `bandsFor`, `loadPool` (missing band → empty; all missing → friendly error), `samplePuzzles` (theme bitmask filter, excludes ids already in the textarea, partial Fisher–Yates). Theme constants in `src/lib/lichess.ts`: `LICHESS_THEMES` (UI list, `mix` = no filter) and `THEME_BITS` (slug → bit, **imported by the indexer too** so index and app cannot drift).
+- Index builder: `npm run build:index` → `tools/build-puzzle-index.ts` (tsx). Streams `lichess_db_puzzle.csv.zst` (CC0) via `curl | zstd -d`, filters quality (`RD < 90`, `Popularity > 80`, `NbPlays > 100`), reservoir-samples 1000/band, validates each sampled FEN with chess.js. Rebuilt monthly by `.github/workflows/rebuild-puzzle-index.yml` (also `workflow_dispatch`); the generated `public/puzzle-index/` is committed.
+- Loaded puzzles are **appended** to `fenText` as normal input lines `FEN ; Lichess <id> (<rating>)` — no special downstream handling; the panel also shows an ephemeral result list (id linked to `lichess.org/training/<id>` + rating). Ratings are dump-fresh (≤ ~2 months stale), acceptable for printed sheets.
 
 ### Diagram rendering
 - Pieces are rendered as **SVG vector paths**, never as Unicode characters
@@ -179,7 +185,7 @@ FEN ; title (optional)
 - Do not use `jsPDF`, `html2canvas`, or browser `window.print()` — PDF generation is `@react-pdf/renderer` only
 - Do not render Unicode chess pieces (♔♕♖...) — use SVG vector paths
 - Do not add board coordinates (a-h / 1-8) in v1
-- Do not add any form of persistence (no localStorage, no own backend — the anonymous Lichess public API fetch is the only permitted network call)
+- Do not add any form of persistence (no localStorage, no own backend — puzzle data ships as static files in `public/puzzle-index/`; the app makes no third-party network calls at runtime)
 - Do not put business logic inside components — keep it in `src/lib/`
 - Do not create a cover page
 - Do not mix React SVG elements with @react-pdf SVG primitives

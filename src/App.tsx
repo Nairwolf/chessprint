@@ -31,6 +31,10 @@ export default function App() {
     return () => clearTimeout(timer)
   }, [fenText, allowMissingKings])
 
+  const existingLichessIds = new Set(
+    [...fenText.matchAll(/; Lichess (\w+) \(/g)].map(m => m[1])
+  )
+
   function handlePuzzlesLoaded(lines: string) {
     setFenText(prev => (prev.trim() ? prev.replace(/\s+$/, '') + '\n' + lines : lines))
   }
@@ -72,7 +76,7 @@ export default function App() {
               fenText={fenText}
               onFenChange={setFenText}
             />
-            <LichessImport onLoaded={handlePuzzlesLoaded} />
+            <LichessImport onLoaded={handlePuzzlesLoaded} existingIds={existingLichessIds} />
             <ErrorMessage errors={errors} />
             <ExportControls
               exercisesPerPage={exercisesPerPage}

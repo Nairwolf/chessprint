@@ -1,30 +1,46 @@
 import { useState } from 'react'
-import { LICHESS_DIFFICULTIES, LICHESS_THEMES, fetchLichessPuzzles, puzzlesToLines } from '../../lib/lichess'
-import type { LichessDifficulty, LichessPuzzle } from '../../types'
+import { LICHESS_THEMES, puzzlesToLines } from '../../lib/lichess'
+import { RATING_MAX, RATING_MIN, loadPool, samplePuzzles } from '../../lib/puzzleIndex'
+import type { LichessPuzzle } from '../../types'
 
 type Props = {
   onLoaded: (lines: string) => void
+  existingIds: Set<string>
 }
 
 const COUNT_OPTIONS = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30]
 
+const RATING_STEPS: number[] = []
+for (let r = RATING_MIN; r <= RATING_MAX; r += 100) RATING_STEPS.push(r)
+
 const selectClass =
   'rounded border border-gray-300 px-2 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
 
-export default function LichessImport({ onLoaded }: Props) {
+export default function LichessImport({ onLoaded, existingIds }: Props) {
   const [open, setOpen] = useState(false)
   const [theme, setTheme] = useState('mix')
-  const [difficulty, setDifficulty] = useState<LichessDifficulty>('normal')
+  const [minRating, setMinRating] = useState(600)
+  const [maxRating, setMaxRating] = useState(1500)
   const [count, setCount] = useState(6)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [shortfall, setShortfall] = useState<number | null>(null)
   const [lastLoaded, setLastLoaded] = useState<LichessPuzzle[]>([])
 
   async function handleLoad() {
     setLoading(true)
     setError(null)
+    setShortfall(null)
+    const lo = Math.min(minRating, maxRating)
+    const hi = Math.max(minRating, maxRating)
     try {
-      const puzzles = await fetchLichessPuzzles(theme, difficulty, count)
+      const pool = await loadPool(lo, hi)
+      const puzzles = samplePuzzles(pool, count, theme, existingIds)
+      if (puzzles.length === 0) {
+        setError('No puzzles found for this rating range and theme.')
+        return
+      }
+      if (puzzles.length < count) setShortfall(puzzles.length)
       setLastLoaded(puzzles)
       onLoaded(puzzlesToLines(puzzles))
     } catch (e) {
@@ -70,18 +86,32 @@ export default function LichessImport({ onLoaded }: Props) {
             </div>
 
             <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700" htmlFor="lichess-difficulty">
-                Difficulty
+              <label className="text-sm font-medium text-gray-700" htmlFor="lichess-min-rating">
+                Rating
               </label>
               <select
-                id="lichess-difficulty"
-                value={difficulty}
-                onChange={e => setDifficulty(e.target.value as LichessDifficulty)}
+                id="lichess-min-rating"
+                value={minRating}
+                onChange={e => setMinRating(Number(e.target.value))}
                 className={selectClass}
               >
-                {LICHESS_DIFFICULTIES.map(d => (
-                  <option key={d.value} value={d.value}>
-                    {d.label}
+                {RATING_STEPS.map(r => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+              <span className="text-sm text-gray-500">–</span>
+              <select
+                id="lichess-max-rating"
+                aria-label="Maximum rating"
+                value={maxRating}
+                onChange={e => setMaxRating(Number(e.target.value))}
+                className={selectClass}
+              >
+                {RATING_STEPS.map(r => (
+                  <option key={r} value={r}>
+                    {r}
                   </option>
                 ))}
               </select>
@@ -126,6 +156,12 @@ export default function LichessImport({ onLoaded }: Props) {
               <p className="text-sm font-medium text-gray-700">
                 Loaded {lastLoaded.length} puzzle{lastLoaded.length > 1 ? 's' : ''}:
               </p>
+              {shortfall !== null && (
+                <p className="text-xs text-amber-600">
+                  Only {shortfall} of {count} requested puzzles available for this rating range
+                  and theme.
+                </p>
+              )}
               <ul className="flex flex-col gap-0.5">
                 {lastLoaded.map(p => (
                   <li key={p.id} className="text-sm text-gray-700">

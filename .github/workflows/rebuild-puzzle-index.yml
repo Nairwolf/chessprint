@@ -1,0 +1,29 @@
+name: rebuild-puzzle-index
+
+on:
+  schedule:
+    - cron: "0 4 6 * *" # 6th of each month, the day after Lichess's monthly DB export
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build:index
+      - name: Commit regenerated index
+        run: |
+          git config user.name "puzzle-index-bot"
+          git config user.email "puzzle-index-bot@users.noreply.github.com"
+          git add public/puzzle-index
+          git diff --cached --quiet && echo "index unchanged" && exit 0
+          git commit -m "chore: rebuild puzzle index from latest Lichess dump"
+          git push

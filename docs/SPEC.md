@@ -81,14 +81,16 @@ For each valid exercise, a chess diagram is generated from the FEN:
 
 ### 3.7 Lichess puzzle import
 
-A collapsible "Load puzzles from Lichess" panel below the exercise textarea fetches random puzzles from the Lichess public API (no account, no API key):
+A collapsible "Load puzzles from Lichess" panel below the exercise textarea loads random puzzles from a **static, pre-built puzzle index** (no account, no API key, no runtime Lichess API calls):
 
-- The user picks a **theme** (curated list: mate in 1/2, fork, pin, skewer, etc., or "Any theme"), a **difficulty** (5 Lichess buckets, relative to a 1500 rating for anonymous requests), and a **count** (1–30).
-- One request to `GET https://lichess.org/api/puzzle/batch/{theme}?nb={count}&difficulty={difficulty}` (CORS-enabled). Each returned puzzle's position is derived by replaying the truncated PGN with chess.js.
+- The user picks a **theme** (curated list: mate in 1/2, fork, pin, skewer, etc., or "Any theme"), a **rating range** (min–max selects, 500–3200 in steps of 100; the Lichess live API cannot filter by rating, hence the index), and a **count** (1–30).
+- The index is built monthly by CI from the Lichess puzzle database dump (CC0): quality-filtered (rating deviation < 90, popularity > 80, plays > 100), ~1,000 puzzles sampled per 100-point rating band, shipped as static JSON in `public/puzzle-index/` (~2 MB total; a load fetches only the 1–3 band files covering the range, ~31 KB gzipped each).
+- Puzzle ratings are therefore up to ~2 months stale; acceptable for printed difficulty labels (the quality filter selects mature puzzles whose ratings drift slowly).
+- Puzzles already present in the textarea (matched by Lichess id in the line title) are excluded, so repeated loads never duplicate.
+- If fewer puzzles than requested exist for the selection, the available ones are inserted and the panel says so.
 - Loaded puzzles are **appended** to the textarea as regular input lines: `FEN ; Lichess <id> (<rating>)` — they then flow through the normal parse/validate/preview/export pipeline with no special handling.
 - The panel also lists the loaded puzzles (id linking to `lichess.org/training/<id>`, plus rating). This list is ephemeral (replaced on each load, lost on page refresh); the id/rating embedded in each line's title is the durable copy.
-- Network failures and rate limiting (HTTP 429) show a friendly error inside the panel; the textarea is never modified on failure.
-- This is the app's only network call and does not change the no-persistence rule.
+- Load failures (index unreachable) show a friendly error inside the panel; the textarea is never modified on failure.
 
 ## 4. Persistence and user accounts
 

@@ -9,3 +9,7 @@ obtained via the lichess-org/lila repository (public/piece/caliente).
 The set is embedded as flattened SVG path data in src/lib/pieces.ts.
 Note: the NonCommercial clause of this license applies to any
 distribution of ChessPrint that includes these graphics.
+
+Puzzle data: sampled from the Lichess puzzle database
+(https://database.lichess.org/#puzzles), released under CC0
+(public domain). Shipped as generated files in public/puzzle-index/.

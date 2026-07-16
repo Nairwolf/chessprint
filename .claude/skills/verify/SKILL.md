@@ -24,7 +24,8 @@ puppeteer.launch({ executablePath: '/usr/bin/chromium', headless: 'new', args: [
 
 Useful handles:
 - Textarea: `#fen-input`; document title: `#doc-title`.
-- Lichess panel selects: `#lichess-theme`, `#lichess-difficulty`, `#lichess-count`; find buttons by text ("Load puzzles from Lichess", "Load puzzles", "Export PDF").
+- Lichess panel selects: `#lichess-theme`, `#lichess-min-rating`, `#lichess-max-rating`, `#lichess-count`; find buttons by text ("Load puzzles from Lichess", "Load puzzles", "Export PDF").
+- Puzzles come from the static index (`/puzzle-index/<band>.json`); block those URLs to simulate index failure. Cross-check an entry via `curl https://lichess.org/api/puzzle/<id>`.
 - Validation debounce is 300ms — wait ~600ms after input before reading preview/errors.
 - Wait for load completion by polling for no button labeled `Loading…`.
 
