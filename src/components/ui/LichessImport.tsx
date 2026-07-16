@@ -8,7 +8,10 @@ type Props = {
   existingIds: Set<string>
 }
 
-const COUNT_OPTIONS = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30]
+const COUNT_MIN = 1
+const COUNT_MAX = 50
+
+const clampCount = (n: number) => Math.min(COUNT_MAX, Math.max(COUNT_MIN, n))
 
 const RATING_STEPS: number[] = []
 for (let r = RATING_MIN; r <= RATING_MAX; r += 100) RATING_STEPS.push(r)
@@ -22,15 +25,24 @@ export default function LichessImport({ onLoaded, existingIds }: Props) {
   const [minRating, setMinRating] = useState(600)
   const [maxRating, setMaxRating] = useState(1500)
   const [count, setCount] = useState(6)
+  const [countStr, setCountStr] = useState('6')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [shortfall, setShortfall] = useState<number | null>(null)
   const [lastLoaded, setLastLoaded] = useState<LichessPuzzle[]>([])
 
+  function commitCount(raw: string): number {
+    const n = clampCount(Math.round(Number(raw)) || COUNT_MIN)
+    setCount(n)
+    setCountStr(String(n))
+    return n
+  }
+
   async function handleLoad() {
     setLoading(true)
     setError(null)
     setShortfall(null)
+    const count = commitCount(countStr)
     const lo = Math.min(minRating, maxRating)
     const hi = Math.max(minRating, maxRating)
     try {
@@ -121,18 +133,17 @@ export default function LichessImport({ onLoaded, existingIds }: Props) {
               <label className="text-sm font-medium text-gray-700" htmlFor="lichess-count">
                 Count
               </label>
-              <select
+              <input
                 id="lichess-count"
-                value={count}
-                onChange={e => setCount(Number(e.target.value))}
-                className={selectClass}
-              >
-                {COUNT_OPTIONS.map(n => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
+                type="number"
+                min={COUNT_MIN}
+                max={COUNT_MAX}
+                step={1}
+                value={countStr}
+                onChange={e => setCountStr(e.target.value)}
+                onBlur={() => commitCount(countStr)}
+                className={`${selectClass} w-16`}
+              />
             </div>
 
             <button
