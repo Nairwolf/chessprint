@@ -28,6 +28,15 @@ export type ParsedLine = {
   lineNumber: number
 }
 
+export type LichessDifficulty = 'easiest' | 'easier' | 'normal' | 'harder' | 'hardest'
+
+export type LichessPuzzle = {
+  id: string
+  fen: string
+  rating: number
+  themes: string[]
+}
+
 export type PieceKey = 'K' | 'Q' | 'R' | 'B' | 'N' | 'P' | 'k' | 'q' | 'r' | 'b' | 'n' | 'p'
 
 export type PieceLayer = {

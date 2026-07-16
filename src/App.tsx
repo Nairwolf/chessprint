@@ -1,6 +1,7 @@
 import { pdf } from '@react-pdf/renderer'
 import { useEffect, useState } from 'react'
 import ExerciseForm from './components/ui/ExerciseForm'
+import LichessImport from './components/ui/LichessImport'
 import ExportControls from './components/ui/ExportControls'
 import ErrorMessage from './components/ui/ErrorMessage'
 import Preview from './components/ui/Preview'
@@ -29,6 +30,10 @@ export default function App() {
     }, 300)
     return () => clearTimeout(timer)
   }, [fenText, allowMissingKings])
+
+  function handlePuzzlesLoaded(lines: string) {
+    setFenText(prev => (prev.trim() ? prev.replace(/\s+$/, '') + '\n' + lines : lines))
+  }
 
   async function handleExport() {
     const { exercises: exs, errors: errs } = validateExercises(
@@ -67,6 +72,7 @@ export default function App() {
               fenText={fenText}
               onFenChange={setFenText}
             />
+            <LichessImport onLoaded={handlePuzzlesLoaded} />
             <ErrorMessage errors={errors} />
             <ExportControls
               exercisesPerPage={exercisesPerPage}

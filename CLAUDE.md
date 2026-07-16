@@ -42,6 +42,7 @@ chessprint/
 │   │   │   ├── ExerciseForm.tsx     # Document title field + FEN textarea
 │   │   │   ├── ExportControls.tsx   # Diagrams-per-page selector + export button
 │   │   │   ├── ErrorMessage.tsx     # Blocking error display (line number + reason)
+│   │   │   ├── LichessImport.tsx    # Collapsible panel: fetch Lichess puzzles by theme/difficulty/count
 │   │   │   └── Preview.tsx          # Parsed exercise list preview
 │   │   ├── diagram/
 │   │   │   ├── ChessBoard.tsx       # SVG diagram for the web UI (standard React SVG)
@@ -54,6 +55,7 @@ chessprint/
 │   │   ├── parser.ts            # Splits lines on ";", extracts FEN and optional title
 │   │   ├── validator.ts         # Validates each FEN via chess.js, returns ParseError[]
 │   │   ├── fen.ts               # FEN utilities (extract active color, piece positions)
+│   │   ├── lichess.ts           # Lichess puzzle API client (batch fetch, PGN→FEN, line formatting)
 │   │   └── layout.ts            # Computes dynamic sizes from exercisesPerPage (1–6)
 │   ├── types/
 │   │   └── index.ts             # Shared types: Exercise, ParseError, ExportConfig
@@ -119,6 +121,11 @@ FEN ; title (optional)
 - Validation is triggered on input with a ~300ms debounce, and again on export click
 - **Allow missing kings** (`ExportConfig.allowMissingKings`, off by default): when enabled, a FEN that chess.js rejects is retried with phantom kings inserted on empty squares (`withPlaceholderKings` in `src/lib/fen.ts`). If the patched FEN validates, the original (kingless) FEN is accepted for rendering; otherwise the patched attempt's error is reported. This relaxes **only** the king-count check — malformed FENs, back-rank pawns, and *too many* kings stay blocked. Rendering needs no changes: `fenToBoard` parses the raw FEN and never calls chess.js
 
+### Lichess puzzle import
+- `LichessImport.tsx` (below the textarea) fetches random puzzles anonymously from `GET https://lichess.org/api/puzzle/batch/{theme}?nb={1-30}&difficulty={easiest|easier|normal|harder|hardest}` (CORS `*`, no auth). This is the app's **only** network call.
+- All logic lives in `src/lib/lichess.ts`: curated `LICHESS_THEMES`, `LICHESS_DIFFICULTIES`, `pgnToFen` (replays the truncated SAN movetext move-by-move — do **not** use `chess.loadPgn`, the movetext has no move numbers), `fetchLichessPuzzles` (dedupes by id, skips unreplayable PGNs, friendly errors incl. 429), `puzzlesToLines`.
+- Loaded puzzles are **appended** to `fenText` as normal input lines `FEN ; Lichess <id> (<rating>)` — no special downstream handling; the panel also shows an ephemeral result list (id linked to `lichess.org/training/<id>` + rating).
+
 ### Diagram rendering
 - Pieces are rendered as **SVG vector paths**, never as Unicode characters
 - Piece set: Lichess **caliente** (CC BY-NC-SA 4.0, attribution in `NOTICE` — non-commercial use only), vendored as generated layered-path data in `src/lib/pieces.ts` (`PIECES: Record<PieceKey, PieceLayer[]>`, 45×45 viewBox). Do not edit that file by hand; the data is pre-flattened (no arcs, no gradients, no transforms) so it renders identically in web SVG and `@react-pdf`
@@ -172,7 +179,7 @@ FEN ; title (optional)
 - Do not use `jsPDF`, `html2canvas`, or browser `window.print()` — PDF generation is `@react-pdf/renderer` only
 - Do not render Unicode chess pieces (♔♕♖...) — use SVG vector paths
 - Do not add board coordinates (a-h / 1-8) in v1
-- Do not add any form of persistence (no localStorage, no backend calls)
+- Do not add any form of persistence (no localStorage, no own backend — the anonymous Lichess public API fetch is the only permitted network call)
 - Do not put business logic inside components — keep it in `src/lib/`
 - Do not create a cover page
 - Do not mix React SVG elements with @react-pdf SVG primitives
@@ -199,5 +206,5 @@ Follow this order to build on solid foundations at each step:
 
 - Cross-device sheet saving (requires Go backend + PostgreSQL)
 - Short URL sharing (requires server-side slug storage)
-- Import from a Lichess study (feasible in pure frontend via public Lichess API)
+- Import from a Lichess **study** (random-puzzle import is done — see "Lichess puzzle import" above)
 - Child-friendly decorations to fill empty space when exercisesPerPage < 6

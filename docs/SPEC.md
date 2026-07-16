@@ -11,9 +11,11 @@ A web application for generating chess exercise sheets as PDFs, aimed at childre
 - PDF export with configurable layout.
 - No persistence (stateless site, no accounts, no database).
 
+Implemented post-v1:
+- Import from an external puzzle database (Lichess, see 3.7).
+
 Out of scope for v1 (future directions):
 - Child-friendly decorations / illustrations to fill empty space.
-- Import from an external puzzle database (e.g. Lichess).
 - Board coordinates display (letters a-h, numbers 1-8).
 - Exercise list saving / persistence.
 - Last move display (arrow, square highlight).
@@ -76,6 +78,17 @@ For each valid exercise, a chess diagram is generated from the FEN:
 
 - No child-friendly decorations (mascot, illustrations, borders) in v1.
 - Planned v2 direction: when the chosen diagrams-per-page count is below 6, fill the remaining empty space with small child-friendly drawings.
+
+### 3.7 Lichess puzzle import
+
+A collapsible "Load puzzles from Lichess" panel below the exercise textarea fetches random puzzles from the Lichess public API (no account, no API key):
+
+- The user picks a **theme** (curated list: mate in 1/2, fork, pin, skewer, etc., or "Any theme"), a **difficulty** (5 Lichess buckets, relative to a 1500 rating for anonymous requests), and a **count** (1–30).
+- One request to `GET https://lichess.org/api/puzzle/batch/{theme}?nb={count}&difficulty={difficulty}` (CORS-enabled). Each returned puzzle's position is derived by replaying the truncated PGN with chess.js.
+- Loaded puzzles are **appended** to the textarea as regular input lines: `FEN ; Lichess <id> (<rating>)` — they then flow through the normal parse/validate/preview/export pipeline with no special handling.
+- The panel also lists the loaded puzzles (id linking to `lichess.org/training/<id>`, plus rating). This list is ephemeral (replaced on each load, lost on page refresh); the id/rating embedded in each line's title is the durable copy.
+- Network failures and rate limiting (HTTP 429) show a friendly error inside the panel; the textarea is never modified on failure.
+- This is the app's only network call and does not change the no-persistence rule.
 
 ## 4. Persistence and user accounts
 
