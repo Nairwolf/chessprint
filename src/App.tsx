@@ -56,7 +56,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="border-b border-gray-200 bg-white px-8 py-4">
-        <h1 className="text-xl font-bold text-gray-900">ChessPrint</h1>
+        <h1 className="text-center text-xl font-bold text-gray-900">ChessPrint</h1>
       </header>
       <main className="mx-auto max-w-6xl px-8 py-8">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
