@@ -213,7 +213,17 @@ by rating (lila #16694, closed *not planned*), so puzzles now come from a **stat
 
 **Verified:** indexer run on the full dump (28 bands, no dropped FENs); sampled FEN + theme
 mask cross-checked against `GET /api/puzzle/{id}`; headless-browser flow (load, range
-compliance, dedupe on reload, sparse-range note, index-unreachable error, PDF export).
+compliance, dedupe on reload, sparse-range note, index-unreachable error, PDF export). CI
+workflow confirmed green end-to-end via `workflow_dispatch` (build → commit → push → deploy).
+
+**Known minor limitation — non-deterministic index (improve later):** the indexer's reservoir
+sampling uses an unseeded RNG, so every rebuild produces a *different* 1,000-puzzle sample even
+when the source dump is unchanged. Consequence: each non-no-op workflow run adds a ~1.9 MB
+commit to git history (the monthly cron, and any manual `workflow_dispatch`, will almost never
+hit the "index unchanged" no-op path). Harmless at monthly cadence, but repo size grows over
+time. **Fix when it matters:** seed the RNG deterministically from the dump's date/version so an
+unchanged dump yields byte-identical output and the commit step correctly no-ops. Until then,
+avoid triggering the workflow manually just to test.
 
 ---
 
