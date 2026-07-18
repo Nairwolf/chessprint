@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { LICHESS_THEMES, puzzlesToLines } from '../../lib/lichess'
+import { LICHESS_THEMES, puzzlesToLines, puzzlesToSolutionMap } from '../../lib/lichess'
 import { RATING_MAX, RATING_MIN, loadPool, samplePuzzles } from '../../lib/puzzleIndex'
 import type { LichessPuzzle } from '../../types'
 
 type Props = {
-  onLoaded: (lines: string) => void
+  onLoaded: (lines: string, solutions: Record<string, string>) => void
   existingIds: Set<string>
+  includeSolutions: boolean
+  onIncludeSolutionsChange: (b: boolean) => void
 }
 
 const COUNT_MIN = 1
@@ -19,7 +21,12 @@ for (let r = RATING_MIN; r <= RATING_MAX; r += 100) RATING_STEPS.push(r)
 const selectClass =
   'rounded border border-gray-300 px-2 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
 
-export default function LichessImport({ onLoaded, existingIds }: Props) {
+export default function LichessImport({
+  onLoaded,
+  existingIds,
+  includeSolutions,
+  onIncludeSolutionsChange,
+}: Props) {
   const [open, setOpen] = useState(false)
   const [theme, setTheme] = useState('mix')
   const [minRating, setMinRating] = useState(600)
@@ -54,7 +61,7 @@ export default function LichessImport({ onLoaded, existingIds }: Props) {
       }
       if (puzzles.length < count) setShortfall(puzzles.length)
       setLastLoaded(puzzles)
-      onLoaded(puzzlesToLines(puzzles))
+      onLoaded(puzzlesToLines(puzzles), puzzlesToSolutionMap(puzzles))
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load puzzles.')
     } finally {
@@ -155,6 +162,16 @@ export default function LichessImport({ onLoaded, existingIds }: Props) {
               {loading ? 'Loading…' : 'Load puzzles'}
             </button>
           </div>
+
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <input
+              type="checkbox"
+              checked={includeSolutions}
+              onChange={e => onIncludeSolutionsChange(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            Include solutions (answer key) in the exported PDF
+          </label>
 
           {error && (
             <div className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">

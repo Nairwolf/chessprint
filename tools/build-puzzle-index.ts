@@ -30,7 +30,7 @@ const perBand = Number(arg('per-band', '1000'))
 const source = arg('source', DEFAULT_SOURCE)
 const outDir = arg('out', 'public/puzzle-index')
 
-type Row = { id: string; fen: string; firstMove: string; rating: number; themes: string[] }
+type Row = { id: string; fen: string; moves: string[]; rating: number; themes: string[] }
 
 // Reservoir sampling (Algorithm R) per rating band
 const reservoirs = new Map<number, { rows: Row[]; seen: number }>()
@@ -50,15 +50,19 @@ function offer(band: number, row: Row) {
   }
 }
 
-function solverFacingFen(csvFen: string, firstMoveUci: string): string | null {
+// Apply Moves[0] (the opponent's setup move) to reach the solver-facing position,
+// then replay Moves[1..] (the solution) collecting each move's SAN. Returns both the
+// solver-facing FEN and the space-joined SAN solution, or null if any move is illegal.
+function solverFacing(csvFen: string, moves: string[]): { fen: string; solution: string } | null {
   try {
     const chess = new Chess(csvFen)
-    chess.move({
-      from: firstMoveUci.slice(0, 2),
-      to: firstMoveUci.slice(2, 4),
-      promotion: firstMoveUci[4],
-    })
-    return chess.fen()
+    const play = (uci: string) =>
+      chess.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] })
+    play(moves[0])
+    const fen = chess.fen()
+    const san: string[] = []
+    for (let i = 1; i < moves.length; i++) san.push(play(moves[i]).san)
+    return { fen, solution: san.join(' ') }
   } catch {
     return null
   }
@@ -90,7 +94,7 @@ async function main() {
     offer(Math.floor(rating / BAND_WIDTH) * BAND_WIDTH, {
       id: f[0],
       fen: f[1],
-      firstMove: f[2].split(' ')[0],
+      moves: f[2].split(' '),
       rating,
       themes: f[7].split(' '),
     })
@@ -107,8 +111,8 @@ async function main() {
   for (const band of bands) {
     const entries: IndexEntry[] = []
     for (const row of reservoirs.get(band)!.rows) {
-      const fen = solverFacingFen(row.fen, row.firstMove)
-      if (!fen) {
+      const res = solverFacing(row.fen, row.moves)
+      if (!res) {
         dropped++
         continue
       }
@@ -117,7 +121,7 @@ async function main() {
         const bit = THEME_BITS[t]
         if (bit !== undefined) mask |= 1 << bit
       }
-      entries.push([row.id, fen, row.rating, mask])
+      entries.push([row.id, res.fen, row.rating, mask, res.solution])
     }
     entries.sort((a, b) => a[2] - b[2])
     writeFileSync(`${outDir}/${band}.json`, JSON.stringify(entries))
@@ -141,7 +145,7 @@ async function main() {
       2
     )
   )
-  if (dropped > 0) console.error(`dropped ${dropped} entries with unreplayable first moves`)
+  if (dropped > 0) console.error(`dropped ${dropped} entries with unreplayable moves`)
   console.log(`wrote ${bands.length} band files + manifest.json to ${outDir}`)
 }
 

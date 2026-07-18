@@ -3,6 +3,7 @@ export type Exercise = {
   fen: string
   title?: string
   activeColor: 'w' | 'b'
+  solution?: string // space-joined SAN solution moves (Lichess-imported puzzles only)
 }
 
 export type ParseError = {
@@ -20,6 +21,7 @@ export type ExportConfig = {
   exercisesPerPage: ExercisesPerPage
   orientation: OrientationMode
   allowMissingKings: boolean
+  includeSolutions: boolean
 }
 
 export type ParsedLine = {
@@ -32,10 +34,12 @@ export type LichessPuzzle = {
   id: string
   fen: string
   rating: number
+  solution: string // space-joined SAN solution moves
 }
 
-// One puzzle in a static index band file: [id, solver-facing FEN, rating, theme bitmask]
-export type IndexEntry = [string, string, number, number]
+// One puzzle in a static index band file:
+// [id, solver-facing FEN, rating, theme bitmask, space-joined SAN solution]
+export type IndexEntry = [string, string, number, number, string]
 
 export type PieceKey = 'K' | 'Q' | 'R' | 'B' | 'N' | 'P' | 'k' | 'q' | 'r' | 'b' | 'n' | 'p'
 

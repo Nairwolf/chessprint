@@ -8,6 +8,7 @@ import Preview from './components/ui/Preview'
 import PdfDocument from './components/pdf/PdfDocument'
 import { parseInput } from './lib/parser'
 import { validateExercises } from './lib/validator'
+import { attachSolutions } from './lib/lichess'
 import type { Exercise, ParseError, ExportConfig, OrientationMode } from './types'
 
 export default function App() {
@@ -16,6 +17,8 @@ export default function App() {
   const [exercisesPerPage, setExercisesPerPage] = useState<ExportConfig['exercisesPerPage']>(6)
   const [orientation, setOrientation] = useState<OrientationMode>('auto')
   const [allowMissingKings, setAllowMissingKings] = useState(false)
+  const [includeSolutions, setIncludeSolutions] = useState(false)
+  const [solutions, setSolutions] = useState<Record<string, string>>({})
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [errors, setErrors] = useState<ParseError[]>([])
 
@@ -35,8 +38,9 @@ export default function App() {
     [...fenText.matchAll(/; Lichess (\w+) \(/g)].map(m => m[1])
   )
 
-  function handlePuzzlesLoaded(lines: string) {
+  function handlePuzzlesLoaded(lines: string, loadedSolutions: Record<string, string>) {
     setFenText(prev => (prev.trim() ? prev.replace(/\s+$/, '') + '\n' + lines : lines))
+    setSolutions(prev => ({ ...prev, ...loadedSolutions }))
   }
 
   async function handleExport() {
@@ -50,8 +54,14 @@ export default function App() {
 
     const blob = await pdf(
       <PdfDocument
-        exercises={exs}
-        config={{ documentTitle, exercisesPerPage, orientation, allowMissingKings }}
+        exercises={includeSolutions ? attachSolutions(exs, solutions) : exs}
+        config={{
+          documentTitle,
+          exercisesPerPage,
+          orientation,
+          allowMissingKings,
+          includeSolutions,
+        }}
       />
     ).toBlob()
     const url = URL.createObjectURL(blob)
@@ -76,7 +86,12 @@ export default function App() {
               fenText={fenText}
               onFenChange={setFenText}
             />
-            <LichessImport onLoaded={handlePuzzlesLoaded} existingIds={existingLichessIds} />
+            <LichessImport
+              onLoaded={handlePuzzlesLoaded}
+              existingIds={existingLichessIds}
+              includeSolutions={includeSolutions}
+              onIncludeSolutionsChange={setIncludeSolutions}
+            />
             <ErrorMessage errors={errors} />
             <ExportControls
               exercisesPerPage={exercisesPerPage}

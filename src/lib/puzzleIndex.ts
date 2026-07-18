@@ -49,5 +49,7 @@ export function samplePuzzles(
     const j = i + Math.floor(Math.random() * (candidates.length - i))
     ;[candidates[i], candidates[j]] = [candidates[j], candidates[i]]
   }
-  return candidates.slice(0, n).map(([id, fen, rating]) => ({ id, fen, rating }))
+  return candidates
+    .slice(0, n)
+    .map(([id, fen, rating, , solution]) => ({ id, fen, rating, solution: solution ?? '' }))
 }
