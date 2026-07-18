@@ -45,7 +45,7 @@ chessprint/
 │   │   │   ├── ExerciseForm.tsx     # Document title field + FEN textarea
 │   │   │   ├── ExportControls.tsx   # Diagrams-per-page selector + export button
 │   │   │   ├── ErrorMessage.tsx     # Blocking error display (line number + reason)
-│   │   │   ├── LichessImport.tsx    # Collapsible panel: fetch Lichess puzzles by theme/difficulty/count
+│   │   │   ├── LichessImport.tsx    # Collapsible panel: load Lichess puzzles by theme/rating/count + answer-key toggle
 │   │   │   └── Preview.tsx          # Parsed exercise list preview
 │   │   ├── diagram/
 │   │   │   ├── ChessBoard.tsx       # SVG diagram for the web UI (standard React SVG)
@@ -53,12 +53,13 @@ chessprint/
 │   │   └── pdf/
 │   │       ├── PdfDocument.tsx      # Root <Document> component (@react-pdf)
 │   │       ├── PdfPage.tsx          # <Page> with repeated header and exercise grid
-│   │       └── PdfExercise.tsx      # Single exercise: diagram + free answer space
+│   │       ├── PdfExercise.tsx      # Single exercise: diagram + free answer space
+│   │       └── PdfSolutionsPage.tsx # Optional answer-key page(s): two-column list of SAN solutions
 │   ├── lib/
 │   │   ├── parser.ts            # Splits lines on ";", extracts FEN and optional title
 │   │   ├── validator.ts         # Validates each FEN via chess.js, returns ParseError[]
 │   │   ├── fen.ts               # FEN utilities (extract active color, piece positions)
-│   │   ├── lichess.ts           # Lichess theme constants (THEME_BITS shared with indexer) + line formatting
+│   │   ├── lichess.ts           # Lichess theme constants (THEME_BITS shared with indexer) + line/solution formatting
 │   │   ├── puzzleIndex.ts       # Static puzzle index client (band loading, rating filter, sampling)
 │   │   └── layout.ts            # Computes dynamic sizes from exercisesPerPage (1–6)
 │   ├── types/
@@ -86,6 +87,7 @@ type Exercise = {
   fen: string;             // Raw validated FEN string
   title?: string;          // Optional exercise title
   activeColor: 'w' | 'b'; // Extracted from FEN automatically
+  solution?: string;       // Space-joined SAN solution moves (Lichess-imported puzzles only)
 };
 
 type ParseError = {
@@ -100,6 +102,8 @@ type ExportConfig = {
   documentTitle: string;
   exercisesPerPage: 1 | 2 | 3 | 4 | 5 | 6;
   orientation: OrientationMode;
+  allowMissingKings: boolean; // opt-in; see Validation below
+  includeSolutions: boolean;  // opt-in answer key; see Lichess puzzle import below
 };
 ```
 
@@ -127,10 +131,11 @@ FEN ; title (optional)
 
 ### Lichess puzzle import (static index)
 - `LichessImport.tsx` (below the textarea) loads random puzzles by **theme + rating range [min, max] + count** from a **static, pre-built index** served from `public/puzzle-index/` — no Lichess API calls at runtime (the live API cannot filter by rating). Band files are same-origin fetches (~31 KB gzipped each).
-- Index format: one JSON file per 100-pt rating band (`1600.json` = ratings 1600–1699), each a bare array of `IndexEntry = [id, fen, rating, themeMask]`, plus `manifest.json` (build metadata). FENs are already **solver-facing**: the Lichess CSV FEN is the position *before* the opponent's setup move, and the indexer applies `Moves[0]` at build time.
-- Runtime logic in `src/lib/puzzleIndex.ts`: `bandsFor`, `loadPool` (missing band → empty; all missing → friendly error), `samplePuzzles` (theme bitmask filter, excludes ids already in the textarea, partial Fisher–Yates). Theme constants in `src/lib/lichess.ts`: `LICHESS_THEMES` (UI list, `mix` = no filter) and `THEME_BITS` (slug → bit, **imported by the indexer too** so index and app cannot drift).
-- Index builder: `npm run build:index` → `tools/build-puzzle-index.ts` (tsx). Streams `lichess_db_puzzle.csv.zst` (CC0) via `curl | zstd -d`, filters quality (`RD < 90`, `Popularity > 80`, `NbPlays > 100`), reservoir-samples 1000/band, validates each sampled FEN with chess.js. Rebuilt monthly by `.github/workflows/rebuild-puzzle-index.yml` (also `workflow_dispatch`); the generated `public/puzzle-index/` is committed.
+- Index format: one JSON file per 100-pt rating band (`1600.json` = ratings 1600–1699), each a bare array of `IndexEntry = [id, fen, rating, themeMask, solutionSan]`, plus `manifest.json` (build metadata). FENs are already **solver-facing**: the Lichess CSV FEN is the position *before* the opponent's setup move, and the indexer applies `Moves[0]` at build time. `solutionSan` is the rest of the line (`Moves[1..]`) converted to **space-joined SAN** at build time — the printable answer key (see below).
+- Runtime logic in `src/lib/puzzleIndex.ts`: `bandsFor`, `loadPool` (missing band → empty; all missing → friendly error), `samplePuzzles` (theme bitmask filter, excludes ids already in the textarea, partial Fisher–Yates; carries `solution` through, defaulting to `''` for any stale 4-tuple band). Theme constants in `src/lib/lichess.ts`: `LICHESS_THEMES` (UI list, `mix` = no filter) and `THEME_BITS` (slug → bit, **imported by the indexer too** so index and app cannot drift).
+- Index builder: `npm run build:index` → `tools/build-puzzle-index.ts` (tsx). Streams `lichess_db_puzzle.csv.zst` (CC0) via `curl | zstd -d`, filters quality (`RD < 90`, `Popularity > 80`, `NbPlays > 100`), reservoir-samples 1000/band, then replays each sampled puzzle with chess.js — applying `Moves[0]` for the solver-facing FEN and `Moves[1..]` to collect SAN (a puzzle whose moves don't replay is dropped). Rebuilt monthly by `.github/workflows/rebuild-puzzle-index.yml` (also `workflow_dispatch`); the generated `public/puzzle-index/` is committed.
 - Loaded puzzles are **appended** to `fenText` as normal input lines `FEN ; Lichess <id> (<rating>)` — no special downstream handling; the panel also shows an ephemeral result list (id linked to `lichess.org/training/<id>` + rating). Ratings are dump-fresh (≤ ~2 months stale), acceptable for printed sheets.
+- **Answer key** (`ExportConfig.includeSolutions`, off by default; toggle lives **in the Lichess import panel**, not `ExportControls`): solutions are kept out of the textarea in a **session map keyed by Lichess id** in `App.tsx` (populated on import via `puzzlesToSolutionMap`, merged across loads). At export, `attachSolutions` (`src/lib/lichess.ts`) matches each exercise to its solution by parsing the id from its `Lichess <id>` title. When enabled and at least one exercise has a solution, `PdfDocument` appends dedicated **solutions page(s)** *after* all diagram pages (never mixed in): `PdfSolutionsPage` renders a **two-column** list (up to 50 rows/page — `SOLUTION_ROWS_PER_PAGE`) of `ordinal · Lichess <id> title · numbered SAN`. `formatSolution(fen, san)` adds move numbers from the solver-facing FEN's side-to-move + fullmove counter (e.g. `1. Qxf7+ Kxf7 2. Ng5+`, or `24... Rd8 25. Qxd8+` when Black starts). Solutions exist only for Lichess-imported puzzles; manual FENs get none.
 
 ### Diagram rendering
 - Pieces are rendered as **SVG vector paths**, never as Unicode characters

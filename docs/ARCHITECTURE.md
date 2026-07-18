@@ -51,7 +51,8 @@ chessprint/
 │   │   └── pdf/
 │   │       ├── PdfDocument.tsx      # Root <Document> react-pdf component
 │   │       ├── PdfPage.tsx          # <Page> component with header and grid
-│   │       └── PdfExercise.tsx      # Exercise component: diagram + answer space
+│   │       ├── PdfExercise.tsx      # Exercise component: diagram + answer space
+│   │       └── PdfSolutionsPage.tsx # Optional two-column answer-key page(s)
 │   ├── lib/
 │   │   ├── parser.ts            # Parses "FEN ; title" lines
 │   │   ├── validator.ts         # Validates each FEN via chess.js, surfaces errors
@@ -78,6 +79,7 @@ type Exercise = {
   fen: string;             // Raw validated FEN
   title?: string;          // Optional exercise title
   activeColor: 'w' | 'b'; // Extracted automatically from the FEN
+  solution?: string;       // Space-joined SAN solution (Lichess-imported puzzles only)
 };
 
 // A validation error
@@ -95,6 +97,8 @@ type ExportConfig = {
   documentTitle: string;
   exercisesPerPage: 1 | 2 | 3 | 4 | 5 | 6;
   orientation: OrientationMode;
+  allowMissingKings: boolean; // opt-in: accept positions missing king(s)
+  includeSolutions: boolean;  // opt-in: append the answer-key page(s)
 };
 ```
 
@@ -199,6 +203,16 @@ default `alignItems: 'stretch'`, so `textAlign: 'center'` on it takes effect. Do
 `flexDirection: 'row'` header with `flex: 1` / `width: '100%'` on the `Text` — `@react-pdf`
 does not reliably stretch a `Text` node to fill a row parent, so the text box shrinks to its
 content and `textAlign` has no effect.
+
+**Answer-key pages (optional):** when `ExportConfig.includeSolutions` is on and at least one
+exercise carries a `solution`, `PdfDocument` appends dedicated solutions page(s) **after** all
+diagram pages. `App.tsx` keeps solutions in a session map keyed by Lichess id (populated on
+import, out of the textarea) and `attachSolutions` (`src/lib/lichess.ts`) binds them to
+exercises by the id in each `Lichess <id>` title. `PdfSolutionsPage` renders a **two-column**
+list (chunked at `SOLUTION_ROWS_PER_PAGE = 50`, split `Math.ceil(n/2)` down the left column
+first) of `ordinal · title · numbered SAN`; `formatSolution(fen, san)` derives the move numbers
+from the solver-facing FEN. The outer `Page` stays A4 with the same single-page-containment
+discipline as the diagram pages.
 
 ## 8. Validation error handling
 

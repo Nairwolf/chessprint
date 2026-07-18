@@ -194,8 +194,9 @@ by rating (lila #16694, closed *not planned*), so puzzles now come from a **stat
   (`RD < 90`, `Popularity > 80`, `NbPlays > 100` — 3.59M pass), reservoir-samples 1,000 per
   100-pt band, then applies `Moves[0]` to each sampled CSV FEN (the CSV FEN is the position
   *before* the opponent's setup move) and validates with chess.js. Output:
-  `public/puzzle-index/<band>.json` (bare array of `IndexEntry = [id, fen, rating, themeMask]`,
-  ~75 KB raw / ~31 KB gzipped each) + `manifest.json`. Whole index ≈ 1.9 MB, committed.
+  `public/puzzle-index/<band>.json` (bare array of `IndexEntry`, ~75 KB raw / ~31 KB gzipped
+  each) + `manifest.json`. Whole index ≈ 1.9 MB, committed. *(`IndexEntry` gained a 5th
+  `solutionSan` field — see "Puzzle solutions / answer key" below.)*
 - **Rebuild:** `.github/workflows/rebuild-puzzle-index.yml`, monthly cron (6th, day after the
   Lichess export) + `workflow_dispatch`; commits only if changed; Vercel deploys on push.
 - **Runtime:** `src/lib/puzzleIndex.ts` — `bandsFor`/`loadPool` (same-origin fetch of 1–3 band
@@ -224,6 +225,44 @@ hit the "index unchanged" no-op path). Harmless at monthly cadence, but repo siz
 time. **Fix when it matters:** seed the RNG deterministically from the dump's date/version so an
 unchanged dump yields byte-identical output and the commit step correctly no-ops. Until then,
 avoid triggering the workflow manually just to test.
+
+---
+
+## Puzzle solutions / answer key ✅ DONE (2026-07-18)
+
+Optional printable answer key for imported Lichess puzzles. Shipped in two commits: the
+regenerated index data (`chore: rebuild puzzle index with SAN solutions`) then the code
+(`feat: printable answer key for imported Lichess puzzles`) — data first so no commit has the
+feature present but returns empty.
+
+- **Index carries the solution.** `IndexEntry` widened to `[id, fen, rating, themeMask,
+  solutionSan]` (`src/types/index.ts`). `tools/build-puzzle-index.ts` no longer discards
+  `Moves[1..]`: it replays them with chess.js from the solver-facing position and stores the
+  **space-joined SAN** (a puzzle whose moves don't replay is dropped). Whole index regenerated
+  (`npm run build:index`) — also a routine data refresh. `samplePuzzles` carries `solution`
+  through, defaulting to `''` for any stale 4-tuple band.
+- **Solutions kept out of the textarea.** They live in a **session map keyed by Lichess id** in
+  `App.tsx` (built by `puzzlesToSolutionMap`, merged on each import); the appended
+  `FEN ; Lichess <id> (<rating>)` lines are unchanged. At export, `attachSolutions`
+  (`src/lib/lichess.ts`) binds a solution to each exercise via the id parsed from its title.
+  Session-only, lost on refresh — consistent with the stateless app.
+- **Toggle placement.** `ExportConfig.includeSolutions` (off by default). The checkbox lives
+  **inside the Lichess import panel** (`LichessImport.tsx`), not `ExportControls` — solutions
+  only come from Lichess imports.
+- **Rendering.** When enabled and ≥1 exercise has a solution, `PdfDocument` appends dedicated
+  `PdfSolutionsPage`(s) *after* all diagram pages. Two columns, chunked at
+  `SOLUTION_ROWS_PER_PAGE = 50` (split `Math.ceil(n/2)`, left column first) — so a full 50-puzzle
+  import (the import cap) fits on one page. Each row: `ordinal · Lichess <id> title ·
+  formatSolution(fen, san)`, where `formatSolution` numbers the moves from the solver-facing
+  FEN's side-to-move + fullmove counter (`1. Qxf7+ Kxf7 2. Ng5+`, or `24... Rd8 …` when Black
+  starts).
+
+**Verified:** synthetic-CSV builder run confirmed 5-tuple SAN output; `formatSolution` checked
+for white- and black-start numbering; full local index rebuild (6.06M rows) with a sampled
+solution cross-checked against `GET /api/puzzle/vQXOb` (UCI `d1g4 g6g4 d5f6 e8e7 f6g4` = printed
+`14. Qxg4 Qxg4 15. Nf6+ Ke7 16. Nxg4`); headless export of 50 real puzzles → single two-column
+answer-key page, diagram pages unchanged, toggle-off adds no page. `npm run typecheck` +
+`npm run lint` pass. Docs (SPEC §3.8, ARCHITECTURE §4/§7, CLAUDE.md) updated to match.
 
 ---
 

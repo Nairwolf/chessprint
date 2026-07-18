@@ -92,6 +92,16 @@ A collapsible "Load puzzles from Lichess" panel below the exercise textarea load
 - The panel also lists the loaded puzzles (id linking to `lichess.org/training/<id>`, plus rating). This list is ephemeral (replaced on each load, lost on page refresh); the id/rating embedded in each line's title is the durable copy.
 - Load failures (index unreachable) show a friendly error inside the panel; the textarea is never modified on failure.
 
+### 3.8 Answer key (puzzle solutions)
+
+An optional printable answer key for imported Lichess puzzles:
+
+- A checkbox **"Include solutions (answer key)"** inside the Lichess import panel (off by default) turns it on.
+- When enabled, the exported PDF gets dedicated **solutions page(s) appended after all the diagram pages** — never on the same page as a diagram, so children still solve the sheet blind.
+- Each solution is printed as a full move sequence in **SAN** (e.g. `1. Qxf7+ Kxf7 2. Ng5+`), keyed to its puzzle by the `Lichess <id> (<rating>)` title that already prints under the diagram, plus an ordinal.
+- To save paper the solutions are laid out in **two columns** (up to ~50 per page), so a full 50-puzzle import fits on a single answer-key page.
+- Solutions exist **only for Lichess-imported puzzles** (they ship with the static index); manually entered FENs have no solution and are simply omitted from the answer key. Like the rest of the app the solutions are session-only — lost on refresh.
+
 ## 4. Persistence and user accounts
 
 - **No persistence in v1.** No user accounts, no server-side saving.
