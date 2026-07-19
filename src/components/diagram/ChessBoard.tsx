@@ -22,7 +22,7 @@ export default function ChessBoard({ fen, size, orientation }: Props) {
     <svg viewBox={`0 0 ${svgWidth} ${size}`} width={svgWidth} height={size}>
       {board.flatMap((row, ri) =>
         row.map((piece, fi) => {
-          const light = (ri + fi) % 2 === 1
+          const light = (ri + fi) % 2 === 0
           const x = fi * sq
           const y = ri * sq
           const layers = piece ? PIECES[piece as PieceKey] : undefined
