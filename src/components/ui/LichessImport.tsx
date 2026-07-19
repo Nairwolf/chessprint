@@ -8,6 +8,8 @@ type Props = {
   existingIds: Set<string>
   includeSolutions: boolean
   onIncludeSolutionsChange: (b: boolean) => void
+  hideRating: boolean
+  onHideRatingChange: (b: boolean) => void
 }
 
 const COUNT_MIN = 1
@@ -26,6 +28,8 @@ export default function LichessImport({
   existingIds,
   includeSolutions,
   onIncludeSolutionsChange,
+  hideRating,
+  onHideRatingChange,
 }: Props) {
   const [open, setOpen] = useState(false)
   const [theme, setTheme] = useState('mix')
@@ -61,7 +65,7 @@ export default function LichessImport({
       }
       if (puzzles.length < count) setShortfall(puzzles.length)
       setLastLoaded(puzzles)
-      onLoaded(puzzlesToLines(puzzles), puzzlesToSolutionMap(puzzles))
+      onLoaded(puzzlesToLines(puzzles, hideRating), puzzlesToSolutionMap(puzzles))
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load puzzles.')
     } finally {
@@ -171,6 +175,16 @@ export default function LichessImport({
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
             Include solutions (answer key) in the exported PDF
+          </label>
+
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <input
+              type="checkbox"
+              checked={hideRating}
+              onChange={e => onHideRatingChange(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            Hide puzzle rating
           </label>
 
           {error && (

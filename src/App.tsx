@@ -19,6 +19,7 @@ export default function App() {
   const [allowMissingKings, setAllowMissingKings] = useState(false)
   const [coordinates, setCoordinates] = useState(false)
   const [includeSolutions, setIncludeSolutions] = useState(false)
+  const [hideRating, setHideRating] = useState(false)
   const [solutions, setSolutions] = useState<Record<string, string>>({})
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [errors, setErrors] = useState<ParseError[]>([])
@@ -36,7 +37,7 @@ export default function App() {
   }, [fenText, allowMissingKings])
 
   const existingLichessIds = new Set(
-    [...fenText.matchAll(/; Lichess (\w+) \(/g)].map(m => m[1])
+    [...fenText.matchAll(/; Lichess (\w+)/g)].map(m => m[1])
   )
 
   function handlePuzzlesLoaded(lines: string, loadedSolutions: Record<string, string>) {
@@ -93,6 +94,8 @@ export default function App() {
               existingIds={existingLichessIds}
               includeSolutions={includeSolutions}
               onIncludeSolutionsChange={setIncludeSolutions}
+              hideRating={hideRating}
+              onHideRatingChange={setHideRating}
             />
             <ErrorMessage errors={errors} />
             <ExportControls

@@ -24,8 +24,10 @@ export const THEME_BITS: Record<string, number> = Object.fromEntries(
   LICHESS_THEMES.filter(t => t.slug !== 'mix').map((t, i) => [t.slug, i])
 )
 
-export function puzzlesToLines(puzzles: LichessPuzzle[]): string {
-  return puzzles.map(p => `${p.fen} ; Lichess ${p.id} (${p.rating})`).join('\n')
+export function puzzlesToLines(puzzles: LichessPuzzle[], hideRating: boolean): string {
+  return puzzles
+    .map(p => `${p.fen} ; Lichess ${p.id}${hideRating ? '' : ` (${p.rating})`}`)
+    .join('\n')
 }
 
 // Session map so solutions survive without cluttering the FEN textarea. Keyed by

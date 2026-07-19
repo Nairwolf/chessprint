@@ -90,6 +90,7 @@ A collapsible "Load puzzles from Lichess" panel below the exercise textarea load
 - Puzzles already present in the textarea (matched by Lichess id in the line title) are excluded, so repeated loads never duplicate.
 - If fewer puzzles than requested exist for the selection, the available ones are inserted and the panel says so.
 - Loaded puzzles are **appended** to the textarea as regular input lines: `FEN ; Lichess <id> (<rating>)` — they then flow through the normal parse/validate/preview/export pipeline with no special handling.
+- **Hide puzzle rating** (opt-in, off by default): a checkbox in the panel omits the `(<rating>)` suffix from newly appended lines, so the printed diagram title reads just `Lichess <id>` — useful when the rating number would otherwise hint at the puzzle's difficulty to the child solving the sheet. Only the printed/textarea title is affected; the panel's own loaded-puzzles list (see below) always shows the rating, since it's for whoever is building the sheet, never printed.
 - The panel also lists the loaded puzzles (id linking to `lichess.org/training/<id>`, plus rating). This list is ephemeral (replaced on each load, lost on page refresh); the id/rating embedded in each line's title is the durable copy.
 - Load failures (index unreachable) show a friendly error inside the panel; the textarea is never modified on failure.
 
