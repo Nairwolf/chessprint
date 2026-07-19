@@ -1,4 +1,5 @@
 import { Page, StyleSheet, Text, View } from '@react-pdf/renderer'
+import PdfPageNumber from './PdfPageNumber'
 
 export type SolutionRow = {
   ordinal: number // 1-based position of the exercise in the full sheet
@@ -81,6 +82,7 @@ export default function PdfSolutionsPage({ title, rows }: Props) {
 
   return (
     <Page size="A4">
+      <PdfPageNumber />
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerText}>{title}</Text>

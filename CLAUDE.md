@@ -173,6 +173,7 @@ FEN ; title (optional)
 - No cover page — exercises start on page 1
 - Page content (header + grid) must stay **strictly** below the usable page height. If it exactly equals the available height, `@react-pdf` rounds up and spills into a blank continuation page. So: the header takes exactly `headerHeight` (use `borderBottom`, never `marginBottom`), and `computeLayout` subtracts a small `safetyPad` from the grid height.
 - Header title centering: the header `View` is a **column** container (default `flexDirection`) with `justifyContent: 'center'` (vertical centering); the title `Text` stretches full-width via the default `alignItems: 'stretch'`, so `textAlign: 'center'` works. Do **not** use a `flexDirection: 'row'` header with `flex: 1` / `width: '100%'` on the `Text` — `@react-pdf` does not reliably stretch a `Text` node to fill a row parent, so `textAlign` has no effect.
+- **Page numbers:** `PdfPageNumber.tsx` renders a `fixed` `<Text>` (top-right, `position: 'absolute'`) using `@react-pdf`'s built-in `render={({ pageNumber, totalPages }) => ...}`, shown only when `totalPages > 1`. It's placed as a direct child of `<Page>` in both `PdfPage.tsx` and `PdfSolutionsPage.tsx`, independent of the centered header `View` (no risk of the row/flex Text-stretch quirk above). Because `pageNumber`/`totalPages` count every page in the single `<Document>`, solution pages share the same continuous numbering as diagram pages by default — no manual index-threading needed.
 
 ### State management
 - All state lives in `App.tsx` via `useState`

@@ -1,6 +1,7 @@
 import { Page, StyleSheet, Text, View } from '@react-pdf/renderer'
 import type { Exercise, LayoutMetrics, OrientationMode } from '../../types'
 import PdfExercise from './PdfExercise'
+import PdfPageNumber from './PdfPageNumber'
 
 type Props = {
   exercises: Exercise[]
@@ -38,6 +39,7 @@ export default function PdfPage({ exercises, layout, documentTitle, orientation,
 
   return (
     <Page size="A4">
+      <PdfPageNumber />
       <View style={{ padding: margin }}>
         <View style={[styles.header, { height: headerHeight }]}>
           <Text style={styles.headerText}>{documentTitle}</Text>

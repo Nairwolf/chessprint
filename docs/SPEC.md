@@ -73,6 +73,7 @@ For each valid exercise, a chess diagram is generated from the FEN:
 - Diagrams are **centered** within their cell (both horizontally and vertically), with a compact writing strip below. The diagram and answer-space sizes adjust **dynamically** based on the chosen diagrams-per-page value (fewer diagrams per page = larger diagrams). The grid shape is tuned per count: **2/page is stacked** (one diagram above the other) to use the tall page, and the **1/page** board is deliberately shrunk to leave empty space.
 - **Adaptive final page**: when the last page is only partly filled, its diagrams are sized using the layout for the number that actually remain (e.g. 2 leftover diagrams use the 2/page stacked layout), so they fill the page instead of reusing the full-page sizing.
 - The PDF is generated in a print-friendly format (A4 assumed by default, to be confirmed at the technical phase).
+- **Page numbers**: a small "N / total" indicator in the top-right corner of every page, shown only when the exported PDF has more than one page. Solution pages (see 3.8) are counted in the same continuous numbering as diagram pages — the count reflects the full physical stack of paper.
 
 ### 3.6 Visual style
 

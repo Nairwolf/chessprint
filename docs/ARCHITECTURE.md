@@ -147,6 +147,8 @@ The diagram is an SVG generated in React from the FEN. Two distinct components a
 
 **Board coordinates:** opt-in (`ExportConfig.coordinates`, off by default), rendered in a thin gutter *outside* the 8×8 grid — file letters (a-h) along the bottom, rank numbers (1-8) up the left — so they never overlap squares or pieces. `coordLabels(orientation)` in `src/lib/fen.ts` returns the 8 labels in the board's current display order (mirroring `orientBoard`'s reordering), so they stay aligned with pieces when orientation flips. The gutter size (`COORD_GUTTER_FRAC`, also in `src/lib/fen.ts`) is shared with `layout.ts`, which shrinks `boardSize` to make room for it instead of letting it overflow the cell.
 
+**Page numbers:** `PdfPageNumber.tsx` is a small shared component — a `fixed`, absolutely-positioned `<Text>` in the top-right corner using `@react-pdf`'s built-in `render={({ pageNumber, totalPages }) => ...}` prop, rendering nothing when `totalPages <= 1`. It's included as a direct child of `<Page>` in both `PdfPage.tsx` (diagram pages) and `PdfSolutionsPage.tsx` (answer-key pages). Since the whole export is one `<Document>`, `@react-pdf` counts every page — diagram and solution pages share one continuous "N / total" sequence.
+
 ## 7. Dynamic PDF layout
 
 Diagram size and answer space size are computed dynamically in `layout.ts` based on the chosen diagrams-per-page value.
