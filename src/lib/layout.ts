@@ -1,6 +1,10 @@
+import { COORD_GUTTER_FRAC } from './fen'
 import type { ExercisesPerPage, LayoutMetrics } from '../types'
 
-export function computeLayout(exercisesPerPage: ExercisesPerPage): LayoutMetrics {
+export function computeLayout(
+  exercisesPerPage: ExercisesPerPage,
+  coordinates = false,
+): LayoutMetrics {
   const pageWidth = 595
   const pageHeight = 842
   const margin = 24
@@ -44,12 +48,18 @@ export function computeLayout(exercisesPerPage: ExercisesPerPage): LayoutMetrics
   const circlePad = 8 // constant part of the SVG width overhang (see ChessBoardPdf.tsx)
   const boardSafety = 3 // keep content strictly inside the cell (avoids @react-pdf rounding overflow)
 
+  // When coordinates are on, the board SVG grows by gutter*boardSize on the left
+  // (ranks) and bottom (files). Fold that into both budgets so boardSize shrinks
+  // to fit instead of the gutter overflowing the cell. gutter = 0 reduces to the
+  // original formulas exactly, so the default (off) path is unchanged.
+  const gutter = coordinates ? COORD_GUTTER_FRAC : 0
+
   const innerWidth = cellWidth - 2 * cellPad
   const innerHeight = cellHeight - 2 * cellPad
 
   const answerHeight = cellHeight * answerFrac
-  const widthBudget = (innerWidth - circlePad) / circleFactor
-  const heightBudget = innerHeight - answerHeight - titleAllow - boardSafety
+  const widthBudget = (innerWidth - circlePad) / (circleFactor + gutter)
+  const heightBudget = (innerHeight - answerHeight - titleAllow - boardSafety) / (1 + gutter)
   const boardSize = Math.min(widthBudget, heightBudget) * boardScale
 
   return {

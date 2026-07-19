@@ -7,6 +7,7 @@ type Props = {
   layout: LayoutMetrics
   documentTitle: string
   orientation: OrientationMode
+  coordinates: boolean
 }
 
 const styles = StyleSheet.create({
@@ -27,7 +28,7 @@ const styles = StyleSheet.create({
   },
 })
 
-export default function PdfPage({ exercises, layout, documentTitle, orientation }: Props) {
+export default function PdfPage({ exercises, layout, documentTitle, orientation, coordinates }: Props) {
   const { margin, headerHeight, cellWidth, centered, columns } = layout
   const gridWidth = cellWidth * columns
 
@@ -49,6 +50,7 @@ export default function PdfPage({ exercises, layout, documentTitle, orientation 
               layout={layout}
               width={isCentered(i) ? gridWidth : cellWidth}
               orientation={orientation}
+              coordinates={coordinates}
             />
           ))}
         </View>

@@ -5,9 +5,10 @@ import ChessBoard from '../diagram/ChessBoard'
 type Props = {
   exercises: Exercise[]
   orientation: OrientationMode
+  coordinates: boolean
 }
 
-export default function Preview({ exercises, orientation }: Props) {
+export default function Preview({ exercises, orientation, coordinates }: Props) {
   if (exercises.length === 0) return null
 
   return (
@@ -22,6 +23,7 @@ export default function Preview({ exercises, orientation }: Props) {
               fen={ex.fen}
               size={96}
               orientation={resolveOrientation(orientation, ex.activeColor)}
+              coordinates={coordinates}
             />
             <span className="text-sm text-gray-700">
               {ex.title ?? `Exercise ${i + 1}`}

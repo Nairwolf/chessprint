@@ -13,10 +13,10 @@ A web application for generating chess exercise sheets as PDFs, aimed at childre
 
 Implemented post-v1:
 - Import from an external puzzle database (Lichess, see 3.7).
+- Board coordinates display (letters a-h, numbers 1-8), see 3.3.
 
 Out of scope for v1 (future directions):
 - Child-friendly decorations / illustrations to fill empty space.
-- Board coordinates display (letters a-h, numbers 1-8).
 - Exercise list saving / persistence.
 - Last move display (arrow, square highlight).
 
@@ -54,7 +54,7 @@ The user fills in two elements:
 For each valid exercise, a chess diagram is generated from the FEN:
 
 - 8×8 board with pieces positioned according to the FEN.
-- **No coordinates** displayed on the border (no letters a-h, no numbers 1-8) in v1.
+- **Board coordinates** (opt-in, off by default): a checkbox lets the user show file letters (a-h) below the board and rank numbers (1-8) to its left, in a thin border outside the 8×8 grid so they never overlap squares or pieces. The labels follow the board's orientation (see below), so they always match the square each piece sits on.
 - **Active color indicator**: a visual symbol (to be defined at design time — e.g. a black/white dot) displayed outside the board, indicating whose turn it is to play. This information is derived automatically from the FEN; the user inputs nothing extra.
 - **Board orientation**: the diagram can be drawn from White's side, from Black's side, or oriented toward whoever is to move. The mode is chosen globally by the user (see 3.5); the default is **by turn** (the side to move sits at the bottom). The orientation only rotates the 8×8 grid — the active-color indicator still reflects the real side to move and stays at the bottom-right corner.
 - Diagram sized for child use: squares large enough to allow writing or drawing on or just below them.

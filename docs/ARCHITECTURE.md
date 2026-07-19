@@ -99,6 +99,7 @@ type ExportConfig = {
   orientation: OrientationMode;
   allowMissingKings: boolean; // opt-in: accept positions missing king(s)
   includeSolutions: boolean;  // opt-in: append the answer-key page(s)
+  coordinates: boolean;       // opt-in: show a-h/1-8 labels around the board
 };
 ```
 
@@ -144,7 +145,7 @@ The diagram is an SVG generated in React from the FEN. Two distinct components a
 
 **Board orientation:** both diagram components take an explicit `orientation: 'w' | 'b'` prop and flip the grid via `orientBoard()` in `src/lib/fen.ts` (a Black orientation reverses both the rank and file order — a 180° rotation). The user picks a mode (`'white' | 'black' | 'auto'`) once; each render site resolves it to a concrete `'w' | 'b'` with `resolveOrientation(mode, activeColor)` — `'auto'` yields the exercise's own side to move. The indicator circle is unaffected by orientation.
 
-**No coordinates** (no letters a-h, no numbers 1-8) in v1.
+**Board coordinates:** opt-in (`ExportConfig.coordinates`, off by default), rendered in a thin gutter *outside* the 8×8 grid — file letters (a-h) along the bottom, rank numbers (1-8) up the left — so they never overlap squares or pieces. `coordLabels(orientation)` in `src/lib/fen.ts` returns the 8 labels in the board's current display order (mirroring `orientBoard`'s reordering), so they stay aligned with pieces when orientation flips. The gutter size (`COORD_GUTTER_FRAC`, also in `src/lib/fen.ts`) is shared with `layout.ts`, which shrinks `boardSize` to make room for it instead of letting it overflow the cell.
 
 ## 7. Dynamic PDF layout
 

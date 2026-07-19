@@ -8,6 +8,7 @@ type Props = {
   layout: LayoutMetrics
   width: number
   orientation: OrientationMode
+  coordinates: boolean
 }
 
 const styles = StyleSheet.create({
@@ -18,7 +19,7 @@ const styles = StyleSheet.create({
   },
 })
 
-export default function PdfExercise({ exercise, layout, width, orientation }: Props) {
+export default function PdfExercise({ exercise, layout, width, orientation, coordinates }: Props) {
   const { cellHeight, boardSize, answerHeight, columns, rows } = layout
 
   // The cell centers the (board + writing strip) block. For a partly-filled
@@ -43,6 +44,7 @@ export default function PdfExercise({ exercise, layout, width, orientation }: Pr
         fen={exercise.fen}
         size={boardSize}
         orientation={resolveOrientation(orientation, exercise.activeColor)}
+        coordinates={coordinates}
       />
       {exercise.title && <Text style={styles.title}>{exercise.title}</Text>}
       <View style={{ height: answerHeight, width: '100%' }} />

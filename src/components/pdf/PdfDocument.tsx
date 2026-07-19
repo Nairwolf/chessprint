@@ -16,7 +16,7 @@ type Props = {
 }
 
 export default function PdfDocument({ exercises, config }: Props) {
-  const { documentTitle, exercisesPerPage, orientation, includeSolutions } = config
+  const { documentTitle, exercisesPerPage, orientation, includeSolutions, coordinates } = config
 
   const pages: Exercise[][] = []
   for (let i = 0; i < exercises.length; i += exercisesPerPage) {
@@ -52,9 +52,11 @@ export default function PdfDocument({ exercises, config }: Props) {
           // so leftover diagrams fill the page instead of reusing the full-page sizing.
           layout={computeLayout(
             Math.min(exercisesPerPage, pageExercises.length) as ExercisesPerPage,
+            coordinates,
           )}
           documentTitle={documentTitle}
           orientation={orientation}
+          coordinates={coordinates}
         />
       ))}
       {solutionPages.map((rows, pi) => (

@@ -22,6 +22,7 @@ export type ExportConfig = {
   orientation: OrientationMode
   allowMissingKings: boolean
   includeSolutions: boolean
+  coordinates: boolean
 }
 
 export type ParsedLine = {

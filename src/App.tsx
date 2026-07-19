@@ -17,6 +17,7 @@ export default function App() {
   const [exercisesPerPage, setExercisesPerPage] = useState<ExportConfig['exercisesPerPage']>(6)
   const [orientation, setOrientation] = useState<OrientationMode>('auto')
   const [allowMissingKings, setAllowMissingKings] = useState(false)
+  const [coordinates, setCoordinates] = useState(false)
   const [includeSolutions, setIncludeSolutions] = useState(false)
   const [solutions, setSolutions] = useState<Record<string, string>>({})
   const [exercises, setExercises] = useState<Exercise[]>([])
@@ -61,6 +62,7 @@ export default function App() {
           orientation,
           allowMissingKings,
           includeSolutions,
+          coordinates,
         }}
       />
     ).toBlob()
@@ -100,12 +102,14 @@ export default function App() {
               onOrientationChange={setOrientation}
               allowMissingKings={allowMissingKings}
               onAllowMissingKingsChange={setAllowMissingKings}
+              coordinates={coordinates}
+              onCoordinatesChange={setCoordinates}
               onExport={handleExport}
               disabled={errors.length > 0 || exercises.length === 0}
             />
           </div>
           <div>
-            <Preview exercises={exercises} orientation={orientation} />
+            <Preview exercises={exercises} orientation={orientation} coordinates={coordinates} />
           </div>
         </div>
       </main>

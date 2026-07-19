@@ -7,6 +7,8 @@ type Props = {
   onOrientationChange: (m: OrientationMode) => void
   allowMissingKings: boolean
   onAllowMissingKingsChange: (b: boolean) => void
+  coordinates: boolean
+  onCoordinatesChange: (b: boolean) => void
   onExport: () => void
   disabled: boolean
 }
@@ -26,6 +28,8 @@ export default function ExportControls({
   onOrientationChange,
   allowMissingKings,
   onAllowMissingKingsChange,
+  coordinates,
+  onCoordinatesChange,
   onExport,
   disabled,
 }: Props) {
@@ -82,6 +86,16 @@ export default function ExportControls({
           className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
         />
         Allow positions without kings
+      </label>
+
+      <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+        <input
+          type="checkbox"
+          checked={coordinates}
+          onChange={e => onCoordinatesChange(e.target.checked)}
+          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+        Show board coordinates
       </label>
 
       <button

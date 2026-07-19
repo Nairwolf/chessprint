@@ -104,6 +104,7 @@ type ExportConfig = {
   orientation: OrientationMode;
   allowMissingKings: boolean; // opt-in; see Validation below
   includeSolutions: boolean;  // opt-in answer key; see Lichess puzzle import below
+  coordinates: boolean;       // opt-in a-h/1-8 gutter; see Diagram rendering below
 };
 ```
 
@@ -140,7 +141,7 @@ FEN ; title (optional)
 ### Diagram rendering
 - Pieces are rendered as **SVG vector paths**, never as Unicode characters
 - Piece set: Lichess **caliente** (CC BY-NC-SA 4.0, attribution in `NOTICE` — non-commercial use only), vendored as generated layered-path data in `src/lib/pieces.ts` (`PIECES: Record<PieceKey, PieceLayer[]>`, 45×45 viewBox). Do not edit that file by hand; the data is pre-flattened (no arcs, no gradients, no transforms) so it renders identically in web SVG and `@react-pdf`
-- **No board coordinates** in v1 (no a-h letters, no 1-8 numbers)
+- **Board coordinates** (`ExportConfig.coordinates`, off by default; checkbox in `ExportControls`): when on, file letters (a-h) render along the **bottom** edge and rank numbers (1-8) up the **left** edge, in a thin gutter **outside** the 8×8 grid — never overlapping squares or pieces. Orientation-aware via `coordLabels(orientation)` in `src/lib/fen.ts`, which returns labels in the board's current display order (mirrors `orientBoard`'s reordering). Gutter size is `COORD_GUTTER_FRAC` (also in `src/lib/fen.ts`), shared with `computeLayout` so `boardSize` shrinks to leave room for the gutter instead of it overflowing the cell. Rendered in both `ChessBoard.tsx` (web preview) and `ChessBoardPdf.tsx` (PDF export)
 - **Board orientation**: both `ChessBoard.tsx` and `ChessBoardPdf.tsx` take an explicit `orientation: 'w' | 'b'` prop and flip the grid via `orientBoard()` in `src/lib/fen.ts`. The user picks a mode (`ExportConfig.orientation: 'white' | 'black' | 'auto'`); resolve it per exercise with `resolveOrientation(mode, activeColor)` (`'auto'` = side to move). The active-color indicator circle is independent of orientation — always driven by the FEN's real side to move
 - Active color indicator: a filled circle outside the board, bottom-right corner
   - Black filled circle = Black to play
@@ -189,7 +190,6 @@ FEN ; title (optional)
 
 - Do not use `jsPDF`, `html2canvas`, or browser `window.print()` — PDF generation is `@react-pdf/renderer` only
 - Do not render Unicode chess pieces (♔♕♖...) — use SVG vector paths
-- Do not add board coordinates (a-h / 1-8) in v1
 - Do not add any form of persistence (no localStorage, no own backend — puzzle data ships as static files in `public/puzzle-index/`; the app makes no third-party network calls at runtime)
 - Do not put business logic inside components — keep it in `src/lib/`
 - Do not create a cover page

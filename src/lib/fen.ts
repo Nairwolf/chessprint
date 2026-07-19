@@ -21,6 +21,24 @@ export function orientBoard(
   return board.slice().reverse().map(row => row.slice().reverse())
 }
 
+// Coordinate gutter size, as a fraction of boardSize, reserved outside the 8x8
+// grid when ExportConfig.coordinates is on. Shared by layout.ts (board sizing)
+// and both board components (label drawing) so they cannot drift.
+export const COORD_GUTTER_FRAC = 0.075
+
+const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+const RANKS = ['1', '2', '3', '4', '5', '6', '7', '8']
+
+// Labels in display order (matches orientBoard's row/column reordering), so
+// coordLabels(o).files[fi] / .ranks[ri] line up with column/row fi/ri of the
+// already-oriented board.
+export function coordLabels(orientation: 'w' | 'b'): { files: string[]; ranks: string[] } {
+  if (orientation === 'w') {
+    return { files: FILES, ranks: RANKS.slice().reverse() }
+  }
+  return { files: FILES.slice().reverse(), ranks: RANKS }
+}
+
 // Inserts a king for each color that has none, onto an empty square, preserving
 // each rank's square count. Used to check whether a FEN is illegal *only* because
 // of missing kings: patch it, re-validate with chess.js, keep the original FEN.
